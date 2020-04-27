@@ -10,6 +10,7 @@ namespace HostProbe
         private readonly RequestDelegate _next;
         private readonly State _state;
         private readonly IOptionsMonitor<HostProbeConfig> _options;
+
         public ProbeMiddleware(RequestDelegate next, State state, IOptionsMonitor<HostProbeConfig> options)
         {
             _next = next;
@@ -19,22 +20,29 @@ namespace HostProbe
 
         public async Task InvokeAsync(HttpContext context)
         {
+            async Task ReportUsage()
+            {
+                await context.Response.WriteAsync($"CPU at {_state.CpuPercent}\n");
+                await context.Response.WriteAsync($"IIS number of queries {_state.IisRequests}\n");
+            }
+
             var config = _options.CurrentValue;
             if (_state.CpuPercent > config.CpuLimit)
             {
                 context.Response.StatusCode = (int)HttpStatusCode.ServiceUnavailable;
-                await context.Response.WriteAsync("CPU at " + _state.CpuPercent);
+                await ReportUsage();
                 return;
             }
 
             if (_state.IisRequests > config.IisRequestsLimit)
             {
                 context.Response.StatusCode = (int)HttpStatusCode.ServiceUnavailable;
-                await context.Response.WriteAsync("IIS number of queries " + _state.IisRequests);
+                await ReportUsage();
                 return;
             }
 
-            await context.Response.WriteAsync("Looks good");
+            await context.Response.WriteAsync("Looks good\n");
+            await ReportUsage();
         }
     }
 }
