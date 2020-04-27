@@ -22,7 +22,10 @@ namespace HostProbe
             }
             async Task ReportUsageTcpAsync()
             {
-                await connection.Transport.Output.WriteAsync(AsReadOnlyMemory($"{_state.CpuPercent}%\n"));
+                await connection.Transport.Output.WriteAsync(AsReadOnlyMemory("UP%\n"));
+                await connection.Transport.Output.WriteAsync(AsReadOnlyMemory("ready\n"));
+                await connection.Transport.Output.WriteAsync(AsReadOnlyMemory($"{100-_state.CpuPercent}%\n"));
+                await connection.Transport.Output.WriteAsync(AsReadOnlyMemory("\n"));
                 await connection.Transport.Output.FlushAsync();
             }
 
