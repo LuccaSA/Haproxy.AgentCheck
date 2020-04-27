@@ -6,10 +6,12 @@ namespace HostProbe
 {
     public class HttpMiddleware
     {
+        private readonly RequestDelegate _next;
         private readonly StateProjection _stateProjection;
 
-        public HttpMiddleware(StateProjection computeLimits)
+        public HttpMiddleware(RequestDelegate next, StateProjection computeLimits)
         {
+            _next = next;
             _stateProjection = computeLimits;
         }
 
