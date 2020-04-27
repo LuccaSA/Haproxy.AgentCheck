@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.AspNetCore.Connections;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -22,8 +23,18 @@ namespace HostProbe
                 {
                     webBuilder
                         .UseStartup<Startup>()
-                        .UseKestrel()
-                        .UseUrls("http://*:4242");
+                        .UseKestrel(options =>
+                        {
+                            // TCP 4243
+                            options.ListenAnyIP(4243, opt =>
+                            {
+                                opt.UseConnectionHandler<RawTcpMiddleware>();
+                                
+                            });
+                            // HTTP 5000
+                            options.ListenAnyIP(8042);
+                        });
+
                 }).ConfigureServices(services =>
                 {
                     services.AddHostedService<BackgroundWatcher>();
