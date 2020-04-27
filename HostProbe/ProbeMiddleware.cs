@@ -22,8 +22,8 @@ namespace HostProbe
         {
             async Task ReportUsage()
             {
-                await context.Response.WriteAsync($"CPU at {_state.CpuPercent}\n");
-                await context.Response.WriteAsync($"IIS number of queries {_state.IisRequests}\n");
+                await context.Response.WriteAsync($"{_state.CpuPercent}%\n");
+                //await context.Response.WriteAsync($"IIS number of queries {_state.IisRequests}\n");
             }
 
             var config = _options.CurrentValue;
@@ -41,7 +41,7 @@ namespace HostProbe
                 return;
             }
 
-            await context.Response.WriteAsync("Looks good\n");
+            //await context.Response.WriteAsync("Looks good\n");
             await ReportUsage();
         }
     }
