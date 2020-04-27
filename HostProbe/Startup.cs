@@ -12,7 +12,7 @@ namespace HostProbe
 {
     public class Startup
     {
-        private IConfiguration _configuration;
+        private readonly IConfiguration _configuration;
 
         public Startup(IConfiguration configuration)
         {
@@ -24,6 +24,7 @@ namespace HostProbe
             services.Configure<HostProbeConfig>(_configuration.GetSection("HostProbeConfig"));
             services.AddSingleton<StateCollector>();
             services.AddSingleton<State>();
+            services.AddSingleton<StateProjection>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -33,7 +34,7 @@ namespace HostProbe
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseMiddleware<ProbeMiddleware>();
+            app.UseMiddleware<HttpMiddleware>();
         }
     }
 }

@@ -28,7 +28,7 @@ namespace HostProbe
                             // TCP 4243
                             options.ListenAnyIP(4243, opt =>
                             {
-                                opt.UseConnectionHandler<RawTcpMiddleware>();
+                                opt.UseConnectionHandler<TcpMiddleware>();
                                 
                             });
                             // HTTP 5000
