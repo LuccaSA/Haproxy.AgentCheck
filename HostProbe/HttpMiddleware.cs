@@ -19,7 +19,7 @@ namespace HostProbe
         {
             context.Response.StatusCode = _stateProjection.IsServiceAvailable ? (int)HttpStatusCode.OK : (int)HttpStatusCode.ServiceUnavailable;
             await context.Response.WriteAsync($"CPU : {_stateProjection.State.CpuPercent}%\n");
-            await context.Response.WriteAsync($"Requests : {_stateProjection.State.IisRequests}%\n");
+            await context.Response.WriteAsync($"Requests : {_stateProjection.State.IisRequests}\n");
         }
     }
 }
