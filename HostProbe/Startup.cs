@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -16,12 +12,14 @@ namespace HostProbe
 
         public Startup(IConfiguration configuration)
         {
-            this._configuration = configuration;
+            _configuration = configuration;
         }
 
         public void ConfigureServices(IServiceCollection services)
         {
             services.Configure<HostProbeConfig>(_configuration.GetSection("HostProbeConfig"));
+            services.ValidateConfig();
+
             services.AddSingleton<StateCollector>();
             services.AddSingleton<State>();
             services.AddSingleton<StateProjection>();
