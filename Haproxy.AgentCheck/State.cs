@@ -1,4 +1,4 @@
-namespace HostProbe
+namespace Haproxy.AgentCheck
 {
     public class State
     {

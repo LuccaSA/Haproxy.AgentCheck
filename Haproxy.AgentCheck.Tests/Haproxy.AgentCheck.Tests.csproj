@@ -13,7 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\HostProbe\HostProbe.csproj" />
+    <ProjectReference Include="..\Haproxy.AgentCheck\Haproxy.AgentCheck.csproj" />
   </ItemGroup>
 
 </Project>

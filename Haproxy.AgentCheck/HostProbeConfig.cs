@@ -1,6 +1,6 @@
-namespace HostProbe
+namespace Haproxy.AgentCheck
 {
-    public class HostProbeConfig
+    public class AgentCheckConfig
     {
         public int RefreshIntervalInMs { get; set; }
         public int CpuLimit { get; set; }

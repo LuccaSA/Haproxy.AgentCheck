@@ -1,6 +1,6 @@
 using System.Diagnostics;
 
-namespace HostProbe
+namespace Haproxy.AgentCheck
 {
     public class StateCollector
     {

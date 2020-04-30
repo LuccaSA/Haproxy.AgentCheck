@@ -3,7 +3,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Connections;
 
-namespace HostProbe
+namespace Haproxy.AgentCheck
 {
     public class TcpMiddleware : ConnectionHandler
     {

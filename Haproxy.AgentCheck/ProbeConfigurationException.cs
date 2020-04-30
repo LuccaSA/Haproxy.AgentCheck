@@ -1,6 +1,6 @@
 using System;
 
-namespace HostProbe
+namespace Haproxy.AgentCheck
 {
     public class ProbeConfigurationException : Exception
     {

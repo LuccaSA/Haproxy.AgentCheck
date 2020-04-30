@@ -4,7 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-namespace HostProbe
+namespace Haproxy.AgentCheck
 {
     public class Startup
     {
@@ -17,7 +17,7 @@ namespace HostProbe
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.Configure<HostProbeConfig>(_configuration.GetSection("HostProbeConfig"));
+            services.Configure<AgentCheckConfig>(_configuration.GetSection("AgentCheckConfig"));
             services.ValidateConfig();
 
             services.AddSingleton<StateCollector>();

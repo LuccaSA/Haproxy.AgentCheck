@@ -2,9 +2,9 @@
 using System.Linq;
 using Xunit;
 
-namespace HostProbe.Tests
+namespace Haproxy.AgentCheck.Tests
 {
-    public class ValueTest
+    public class LimitTests
     {
         [Theory]
         [InlineData(100, 100, 0)]

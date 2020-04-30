@@ -1,12 +1,12 @@
 using Microsoft.Extensions.DependencyInjection;
 
-namespace HostProbe
+namespace Haproxy.AgentCheck
 {
     public static class ProbeConfigurationExtensions
     {
         public static void ValidateConfig(this IServiceCollection services)
         {
-            services.PostConfigure<HostProbeConfig>(c =>
+            services.PostConfigure<AgentCheckConfig>(c =>
             {
                 if (c.CpuLimit < 10 || c.CpuLimit > 100)
                 {

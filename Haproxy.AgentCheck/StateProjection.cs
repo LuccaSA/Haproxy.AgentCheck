@@ -1,15 +1,15 @@
 using System;
 using Microsoft.Extensions.Options;
 
-namespace HostProbe
+namespace Haproxy.AgentCheck
 {
     public class StateProjection
     {
         private const double _k = 4.61;
-        private readonly IOptionsMonitor<HostProbeConfig> _options;
+        private readonly IOptionsMonitor<AgentCheckConfig> _options;
         public State State { get; }
 
-        public StateProjection(IOptionsMonitor<HostProbeConfig> options, State state)
+        public StateProjection(IOptionsMonitor<AgentCheckConfig> options, State state)
         {
             _options = options;
             State = state;

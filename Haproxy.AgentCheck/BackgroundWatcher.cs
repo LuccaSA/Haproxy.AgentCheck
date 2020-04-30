@@ -4,15 +4,15 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 
-namespace HostProbe
+namespace Haproxy.AgentCheck
 {
     public class BackgroundWatcher : IHostedService, IDisposable
     {
         private Timer _timer;
-        private readonly IOptionsMonitor<HostProbeConfig> _options;
+        private readonly IOptionsMonitor<AgentCheckConfig> _options;
         private IDisposable _disposableOptionHandler;
         private readonly StateCollector _stateCollector;
-        public BackgroundWatcher(IOptionsMonitor<HostProbeConfig> options,   StateCollector stateCollector)
+        public BackgroundWatcher(IOptionsMonitor<AgentCheckConfig> options,   StateCollector stateCollector)
         {
             _options = options;
             _stateCollector = stateCollector; 
@@ -33,7 +33,7 @@ namespace HostProbe
             _timer = new Timer(OnTick, null, TimeSpan.Zero, span);
         }
 
-        private void OnTick(object? state)
+        private void OnTick(object state)
         {
             _stateCollector.Collect();
         }
