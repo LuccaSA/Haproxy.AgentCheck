@@ -1,1 +1,1 @@
- dotnet publish -r win-x64 -c Release /p:PublishSingleFile=true /p:PublishTrimmed=true -o artifacts
+dotnet publish -r win10-x64 -c Release -o artifact 
