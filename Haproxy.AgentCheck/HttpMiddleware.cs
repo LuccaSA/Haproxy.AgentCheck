@@ -6,12 +6,10 @@ namespace Haproxy.AgentCheck
 {
     public class HttpMiddleware
     {
-        private readonly RequestDelegate _next;
         private readonly StateProjection _stateProjection;
 
-        public HttpMiddleware(RequestDelegate next, StateProjection computeLimits)
+        public HttpMiddleware(RequestDelegate _, StateProjection computeLimits)
         {
-            _next = next;
             _stateProjection = computeLimits;
         }
 

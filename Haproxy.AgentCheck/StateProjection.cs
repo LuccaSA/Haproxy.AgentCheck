@@ -24,26 +24,25 @@ namespace Haproxy.AgentCheck
             }
         }
 
-        public int Weight
+        public int Weight => ComputeWeight(State, _options.CurrentValue);
+
+        internal static int ComputeWeight(State state, AgentCheckConfig config)
         {
-            get
+            int weightCpu = WeightResponse(state.CpuPercent, config.CpuLimit, config.SystemResponse);
+            int weightRequestLimit = WeightResponse(state.IisRequests, config.IisRequestsLimit, config.SystemResponse);
+            int weight = Math.Min(weightCpu, weightRequestLimit);
+            if (weight <= 0)
             {
-                var config = _options.CurrentValue;
-
-                int weightCpu = ComputeWeight(State.CpuPercent, config.CpuLimit, config.SystemResponse);
-                int weightRequestLimit = ComputeWeight(State.IisRequests, config.IisRequestsLimit, config.SystemResponse);
-                int weight = Math.Min(weightCpu, weightRequestLimit);
-
-                if (weight <= 0)
-                {
-                    // security to avoid full drain mode
-                    weightCpu = 1;
-                }
-                return weightCpu;
+                weight = 1; // security to avoid full drain mode
             }
+            if (weight > 100)
+            {
+                weight = 100; // security to avoid over allocation
+            }
+            return weight;
         }
 
-        internal static int ComputeWeight(int currentValue, int limit, SystemResponse systemResponse)
+        internal static int WeightResponse(int currentValue, int limit, SystemResponse systemResponse)
         {
             return systemResponse switch
             {
