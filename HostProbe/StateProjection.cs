@@ -5,6 +5,7 @@ namespace HostProbe
 {
     public class StateProjection
     {
+        private const double _k = 4.61;
         private readonly IOptionsMonitor<HostProbeConfig> _options;
         public State State { get; }
 
@@ -28,9 +29,11 @@ namespace HostProbe
             get
             {
                 var config = _options.CurrentValue;
-                int weightCpu = (int)((config.CpuLimit - State.CpuPercent) / (double)config.CpuLimit * 100);
-                int weightRequestLimit = (int)((config.IisRequestsLimit - State.IisRequests) / (double)config.IisRequestsLimit * 100);
+
+                int weightCpu = ComputeWeight(State.CpuPercent, config.CpuLimit, config.SystemResponse);
+                int weightRequestLimit = ComputeWeight(State.IisRequests, config.IisRequestsLimit, config.SystemResponse);
                 int weight = Math.Min(weightCpu, weightRequestLimit);
+
                 if (weight <= 0)
                 {
                     // security to avoid full drain mode
@@ -38,6 +41,16 @@ namespace HostProbe
                 }
                 return weightCpu;
             }
+        }
+
+        internal static int ComputeWeight(int currentValue, int limit, SystemResponse systemResponse)
+        {
+            return systemResponse switch
+            {
+                SystemResponse.Linear => (int)((limit - currentValue) / (double)limit * 100),
+                SystemResponse.FirstOrder => (int)Math.Exp(-currentValue / (_k * limit)) * 100,
+                _ => throw new ArgumentOutOfRangeException(nameof(systemResponse), systemResponse, null)
+            };
         }
     }
 }
