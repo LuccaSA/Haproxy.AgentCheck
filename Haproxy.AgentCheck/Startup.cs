@@ -17,6 +17,7 @@ namespace Haproxy.AgentCheck
 
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddHostedService<BackgroundWatcher>();
             services.Configure<AgentCheckConfig>(_configuration.GetSection("AgentCheckConfig"));
             services.ValidateConfig();
 

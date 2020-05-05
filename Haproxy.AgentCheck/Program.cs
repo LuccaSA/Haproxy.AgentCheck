@@ -25,15 +25,12 @@ namespace Haproxy.AgentCheck
                             options.ListenAnyIP(4243, opt =>
                             {
                                 opt.UseConnectionHandler<TcpMiddleware>();
-                                
+
                             });
                             // HTTP 5000
                             options.ListenAnyIP(8042);
                         });
 
-                }).ConfigureServices(services =>
-                {
-                    services.AddHostedService<BackgroundWatcher>();
                 });
     }
 }

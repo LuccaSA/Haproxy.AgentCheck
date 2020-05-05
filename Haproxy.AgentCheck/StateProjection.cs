@@ -44,12 +44,15 @@ namespace Haproxy.AgentCheck
 
         internal static int WeightResponse(int currentValue, int limit, SystemResponse systemResponse)
         {
-            return systemResponse switch
+            switch (systemResponse)
             {
-                SystemResponse.Linear => (int)((limit - currentValue) / (double)limit * 100),
-                SystemResponse.FirstOrder => (int)Math.Exp(-currentValue / (_k * limit)) * 100,
-                _ => throw new ArgumentOutOfRangeException(nameof(systemResponse), systemResponse, null)
-            };
+                case SystemResponse.Linear:
+                    return (int)((limit - currentValue) / (double)limit * 99) + 1;
+                case SystemResponse.FirstOrder:
+                    return (int)Math.Ceiling(Math.Exp(-currentValue * _k / limit) * 100);
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(systemResponse), systemResponse, null);
+            }
         }
     }
 }

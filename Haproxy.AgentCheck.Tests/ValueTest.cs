@@ -7,9 +7,9 @@ namespace Haproxy.AgentCheck.Tests
     public class LimitTests
     {
         [Theory]
-        [InlineData(100, 100, 0)]
+        [InlineData(100, 100, 1)]
         [InlineData(0, 100, 100)]
-        public void TestRanges(int inputValue, int maxValue, int expected)
+        public void TestSingleWeightResponseInRange(int inputValue, int maxValue, int expected)
         {
             foreach (var systemResponse in Enum.GetValues(typeof(SystemResponse)).OfType<SystemResponse>())
             {
@@ -23,14 +23,18 @@ namespace Haproxy.AgentCheck.Tests
         [InlineData(200, 100, 1)]
         [InlineData(0, 100, 100)]
         [InlineData(-100, 100, 100)]
+        [InlineData(50, 50, 1)]
+        [InlineData(12, 12, 1)]
+        [InlineData(80, 80, 1)]
+        [InlineData(42, 42, 1)]
         public void BoundedWeight(int inputValue, int maxValue, int expected)
         {
-            State state = new State()
+            var state = new State
             {
                 CpuPercent = inputValue,
                 IisRequests = inputValue,
             };
-            AgentCheckConfig config = new AgentCheckConfig
+            var config = new AgentCheckConfig
             {
                 CpuLimit = maxValue,
                 IisRequestsLimit = maxValue
