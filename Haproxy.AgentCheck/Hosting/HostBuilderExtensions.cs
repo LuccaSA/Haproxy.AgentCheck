@@ -21,7 +21,7 @@ namespace Haproxy.AgentCheck.Hosting
                 hostBuilder.UseSystemd();
                 return hostBuilder;
             }
-            throw new NotImplementedException("Unsupported platform");
+            throw new NotSupportedException("Unsupported platform");
         }
 
         public static IWebHostBuilder UseKestrelOnPorts(this IWebHostBuilder webHostBuilder, int http, int tcp)
