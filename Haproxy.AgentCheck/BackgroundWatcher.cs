@@ -11,17 +11,17 @@ namespace Haproxy.AgentCheck
         private Timer _timer;
         private readonly IOptionsMonitor<AgentCheckConfig> _options;
         private IDisposable _disposableOptionHandler;
-        private readonly StateCollector _stateCollector;
+        private readonly IStateCollector _stateCollector;
 
-        public BackgroundWatcher(IOptionsMonitor<AgentCheckConfig> options,   StateCollector stateCollector)
+        public BackgroundWatcher(IOptionsMonitor<AgentCheckConfig> options, IStateCollector stateCollector)
         {
             _options = options;
-            _stateCollector = stateCollector; 
+            _stateCollector = stateCollector;
         }
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            _disposableOptionHandler = _options.OnChange((x,y)=> UpdateTimer());
+            _disposableOptionHandler = _options.OnChange((_, __) => UpdateTimer());
             UpdateTimer();
             return Task.CompletedTask;
         }
@@ -30,8 +30,8 @@ namespace Haproxy.AgentCheck
         {
             var oldTimer = _timer;
             oldTimer?.Dispose();
-            var span = TimeSpan.FromMilliseconds(_options.CurrentValue.RefreshIntervalInMs);
-            _timer = new Timer(OnTick, null, TimeSpan.Zero, span);
+            var period = TimeSpan.FromMilliseconds(_options.CurrentValue.RefreshIntervalInMs);
+            _timer = new Timer(OnTick, null, TimeSpan.Zero, period);
         }
 
         private void OnTick(object state)

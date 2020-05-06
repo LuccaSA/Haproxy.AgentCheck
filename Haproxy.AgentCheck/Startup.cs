@@ -1,3 +1,5 @@
+using System;
+using System.Runtime.InteropServices;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -23,7 +25,7 @@ namespace Haproxy.AgentCheck
             OptionsOverride(services);
             services.ValidateConfig();
 
-            services.AddSingleton<StateCollector>();
+            services.AddMetricCollector();
             services.AddSingleton<State>();
             services.AddSingleton<StateProjection>();
         }
@@ -40,6 +42,25 @@ namespace Haproxy.AgentCheck
             }
 
             app.UseMiddleware<HttpMiddleware>();
+        }
+    }
+
+    internal static class StartupExtensions
+    {
+        internal static void AddMetricCollector(this IServiceCollection services)
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                services.AddSingleton<IStateCollector, WindowsStateCollector>();
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                services.AddSingleton<IStateCollector, LinuxStateCollector>();
+            }
+            else
+            {
+                throw new PlatformNotSupportedException("Only windows and linux platforms are supported");
+            }
         }
     }
 }
