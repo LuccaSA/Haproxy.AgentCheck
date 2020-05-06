@@ -2,13 +2,13 @@
 
 This application is a lightweight external agent installed on servers / VM / pods, exposing TCP & HTTP endpoints to report the server’s state to Haproxy LB. It's based on Kestrel / .NET Core 3.1, so it's very light.
 
-With the reported health metric, haproxy can dynamically adjust backend weight, and evenly load balance traffic between hosts. When a host metric spikes (ex a CPU going to 100% because of a VM on a failing host, or an infinite loop made by a tired developer), the reported weight to haproxy is minimum, telling haproxy to schedule the minimum traffic to this host.
+With the reported health metric, Haproxy can dynamically adjust backend weight, and evenly load balance traffic between hosts. When a host metric spikes (ex a CPU going to 100% because of a VM on a failing host, or an infinite loop made by a tired developer), the reported weight to Haproxy is minimum, telling Haproxy to schedule the minimum traffic to this host.
 
 This feedback loop reduce the blast radius in case of resource exhaustion.
 
-> External agents have an edge over other types of health checks: they can send signals back to HAProxy to force some kind of change in state. For example, they can mark the server as up or down, put it into maintenance mode, change the percentage of traffic flowing to it, or increase and decrease the maximum number of concurrent connections allowed. The agent will trigger your chosen action when some condition occurs, such as when CPU usage spikes or disk space runs low.
+> External agents have an edge over other types of health checks: they can send signals back to Haproxy to force some kind of change in state. For example, they can mark the server as up or down, put it into maintenance mode, change the percentage of traffic flowing to it, or increase and decrease the maximum number of concurrent connections allowed. The agent will trigger your chosen action when some condition occurs, such as when CPU usage spikes or disk space runs low.
 
-See "Gauging Health with an External Agent" [on haproxy blog](https://www.haproxy.com/fr/blog/using-haproxy-as-an-api-gateway-part-3-health-checks/).
+See "Gauging Health with an External Agent" [on Haproxy blog](https://www.haproxy.com/fr/blog/using-haproxy-as-an-api-gateway-part-3-health-checks/).
 
 In practice :
 
@@ -18,15 +18,15 @@ In practice :
 - Suddenly one host is at 40% CPU, Haproxy.AgentCheck returns the value : `up 13%`.
 - Then Haproxy adjust the backend weight for this host, doing so prioritizes hosts with more resource available.
 
-You can see the adjusted backend weights on the haproxy-gui directly (response is `up 87%` in the screenshot) :
+You can see the adjusted backend weights on the Haproxy-Gui directly (response is `up 87%` in the screenshot) :
 
 ![adjusted backends](docs/adjusted_backends.png)
 
 ## Supported OS, metrics
 
-Currently, this application only supports windows (we plan to add linux support soon), and the following metrics
+Currently, this application supports windows and linux, and the following metrics
 - CPU
-- IIS requests
+- IIS requests (windows only)
 
 ## Installation
 
