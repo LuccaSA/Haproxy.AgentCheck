@@ -1,5 +1,6 @@
 <Project>
   <PropertyGroup>
+    <Nullable>enable</Nullable>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <WarningLevel>4</WarningLevel>
     <LangVersion>latest</LangVersion>

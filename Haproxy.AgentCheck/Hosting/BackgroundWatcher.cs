@@ -10,9 +10,9 @@ namespace Haproxy.AgentCheck.Hosting
 {
     public sealed class BackgroundWatcher : IHostedService, IDisposable
     {
-        private Timer _timer;
+        private Timer? _timer;
         private readonly IOptionsMonitor<AgentCheckConfig> _options;
-        private IDisposable _disposableOptionHandler;
+        private IDisposable? _disposableOptionHandler;
         private readonly IStateCollector _stateCollector;
 
         public BackgroundWatcher(IOptionsMonitor<AgentCheckConfig> options, IStateCollector stateCollector)
@@ -36,7 +36,7 @@ namespace Haproxy.AgentCheck.Hosting
             _timer = new Timer(OnTick, null, TimeSpan.Zero, period);
         }
 
-        private void OnTick(object state)
+        private void OnTick(object? state)
         {
             _stateCollector.Collect();
         }

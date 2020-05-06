@@ -6,7 +6,7 @@ namespace Haproxy.AgentCheck.Metrics
     public sealed class LinuxStateCollector : IStateCollector
     {
         private readonly State _state;
-        private ProcStat _lastStat;
+        private ProcStat _lastStat = ProcStat.Empty;
 
         public LinuxStateCollector(State state)
         {
@@ -18,7 +18,7 @@ namespace Haproxy.AgentCheck.Metrics
             using var reader = new StreamReader("/proc/stat");
             var stat = ProcStat.FromLine(reader.ReadLine());
 
-            if (_lastStat != null)
+            if (_lastStat != ProcStat.Empty)
                 _state.CpuPercent = _lastStat.AverageCpuWith(stat);
 
             _lastStat = stat;
@@ -38,7 +38,7 @@ namespace Haproxy.AgentCheck.Metrics
             _stats = stats;
         }
 
-        internal static ProcStat FromLine(string firstProcStatLine)
+        internal static ProcStat FromLine(string? firstProcStatLine)
         {
             if (firstProcStatLine == null)
                 throw new ArgumentNullException(nameof(firstProcStatLine), "/proc/stat is returning invalid data");
@@ -62,12 +62,9 @@ namespace Haproxy.AgentCheck.Metrics
             return new ProcStat(stats);
         }
 
-        internal int AverageCpuWith(ProcStat with)
-        {
-            if (with == null)
-                throw new ArgumentNullException(nameof(with));
-            return 100 - (int)Math.Floor((Idle - with.Idle) * 100 / (double)(Total - with.Total));
-        }
+        internal int AverageCpuWith(ProcStat with) => 100 - (int)Math.Floor((Idle - with.Idle) * 100 / (double)(Total - with.Total));
+
+        public static ProcStat Empty { get; } = new ProcStat(new int[7]);
 
         /// <summary>
         /// normal processes executing in user mode

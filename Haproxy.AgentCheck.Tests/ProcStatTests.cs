@@ -56,12 +56,6 @@ namespace Haproxy.AgentCheck.Tests
             Assert.Throws<ArgumentException>(() => { ProcStat.FromLine("cpu      "); });
 
             Assert.Throws<FormatException>(() => { ProcStat.FromLine("cpu invalid data"); });
-
-            Assert.Throws<ArgumentNullException>(() =>
-            {
-                var stat = ProcStat.FromLine("cpu  41389 68 12438 19810438 1167 0 1230 0 0 0");
-                stat.AverageCpuWith(null);
-            });
         }
     }
 }
