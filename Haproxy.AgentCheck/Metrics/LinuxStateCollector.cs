@@ -26,6 +26,7 @@ namespace Haproxy.AgentCheck.Metrics
 
         public void Dispose()
         {
+            // nothing to dispose
         }
     }
 
@@ -43,7 +44,7 @@ namespace Haproxy.AgentCheck.Metrics
             if (firstProcStatLine == null)
                 throw new ArgumentNullException(nameof(firstProcStatLine), "/proc/stat is returning invalid data");
 
-            if (firstProcStatLine.StartsWith("cpu ", StringComparison.OrdinalIgnoreCase) != true)
+            if (!firstProcStatLine.StartsWith("cpu ", StringComparison.OrdinalIgnoreCase))
                 throw new ArgumentException("/proc/stat is returning invalid first line", nameof(firstProcStatLine));
 
             var span = firstProcStatLine.AsSpan();

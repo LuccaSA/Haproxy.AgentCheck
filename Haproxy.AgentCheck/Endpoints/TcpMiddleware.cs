@@ -17,7 +17,9 @@ namespace Haproxy.AgentCheck.Endpoints
 
         public override async Task OnConnectedAsync(ConnectionContext connection)
         {
-            if (connection == null) throw new ArgumentNullException(nameof(connection));
+            if (connection == null)
+                throw new ArgumentNullException(nameof(connection));
+
             await connection.Transport.Output.WriteAsync(Encoding.ASCII.GetBytes($"up {_stateProjection.Weight}%\n").AsMemory());
             await connection.Transport.Output.FlushAsync();
         }
