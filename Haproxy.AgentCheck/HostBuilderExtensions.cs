@@ -15,7 +15,12 @@ namespace Haproxy.AgentCheck
                 hostBuilder.UseWindowsService();
                 return hostBuilder;
             }
-            throw new NotImplementedException("TODO : SystemD");
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                hostBuilder.UseSystemd();
+                return hostBuilder;
+            }
+            throw new NotImplementedException("Unsupported platform");
         }
 
         public static IWebHostBuilder UseKestrelOnPorts(this IWebHostBuilder webHostBuilder, int http, int tcp)

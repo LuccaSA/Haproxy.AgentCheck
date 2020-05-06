@@ -26,7 +26,6 @@ namespace Haproxy.AgentCheck
             services.ValidateConfig();
 
             services.AddMetricCollector();
-            services.AddSingleton<State>();
             services.AddSingleton<StateProjection>();
         }
 
@@ -49,6 +48,7 @@ namespace Haproxy.AgentCheck
     {
         internal static void AddMetricCollector(this IServiceCollection services)
         {
+            services.AddSingleton<State>();
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 services.AddSingleton<IStateCollector, WindowsStateCollector>();
