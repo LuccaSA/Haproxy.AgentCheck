@@ -38,9 +38,7 @@ namespace Haproxy.AgentCheck.Tests
         private static async Task AssertHttpReports()
         {
             using var client = new HttpClient();
-            client.BaseAddress = new Uri("http://localhost:4412");
-
-            var response = await client.GetAsync(new Uri("/"));
+            var response = await client.GetAsync(new Uri("http://localhost:4412/"));
             response.EnsureSuccessStatusCode();
 
             var content = await response.Content.ReadAsStringAsync();
