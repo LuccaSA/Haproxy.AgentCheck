@@ -36,16 +36,21 @@ namespace Haproxy.AgentCheck
 
         internal static ProcStat FromLine(string firstProcStatLine)
         {
-            if (firstProcStatLine?.StartsWith("cpu ") != true)
+            if (firstProcStatLine == null)
                 throw new ArgumentNullException(nameof(firstProcStatLine), "/proc/stat is returning invalid data");
- 
+
+            if (firstProcStatLine.StartsWith("cpu ") != true)
+                throw new ArgumentException("/proc/stat is returning invalid first line", nameof(firstProcStatLine));
+
             var span = firstProcStatLine.AsSpan();
-            span = span.Slice(5); // "cpu  "
+            span = span.Slice(3).TrimStart(' '); // "cpu"
             var stats = new int[7];
 
             for (int i = 0; i < 7; i++)
             {
                 var nextSpace = span.IndexOf(' ');
+                if (nextSpace == -1)
+                    throw new ArgumentException("/proc/stat structure is invalid", nameof(firstProcStatLine));
                 stats[i] = int.Parse(span.Slice(0, nextSpace));
                 span = span.Slice(nextSpace + 1);
             }
@@ -57,7 +62,7 @@ namespace Haproxy.AgentCheck
         {
             if (with == null)
                 throw new ArgumentNullException(nameof(with));
-            return 100 - (int) Math.Floor((Idle - with.Idle) * 100 / (double) (Total - with.Total));
+            return 100 - (int)Math.Floor((Idle - with.Idle) * 100 / (double)(Total - with.Total));
         }
 
         /// <summary>
