@@ -76,3 +76,13 @@ jobs:
       run: artifacts/dotnet-sonarscanner end /d:sonar.login=${{ secrets.SONAR_TOKEN }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Publish win10-x64
+      run: |
+        dotnet publish Haproxy.AgentCheck/Haproxy.AgentCheck.csproj -r win10-x64 -c Release /p:Version="${{ steps.gitversion.outputs.majorMinorPatch }}" -o artifact/win10-x64
+        zip artifact/Haproxy.AgentCheck.win10-x64.${{ steps.gitversion.outputs.majorMinorPatch }}.zip -q -j artifact/win10-x64/*
+
+    - name: Publish linux-x64
+      run: |
+        dotnet publish Haproxy.AgentCheck/Haproxy.AgentCheck.csproj -r linux-x64 -c Release /p:Version="${{ steps.gitversion.outputs.majorMinorPatch }}" -o artifact/linux-x64
+        zip artifact/Haproxy.AgentCheck.linux-x64.${{ steps.gitversion.outputs.majorMinorPatch }}.zip -q -j artifact/linux-x64/*
