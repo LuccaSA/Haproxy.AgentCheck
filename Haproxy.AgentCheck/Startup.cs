@@ -18,12 +18,18 @@ namespace Haproxy.AgentCheck
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddHostedService<BackgroundWatcher>();
+
             services.Configure<AgentCheckConfig>(_configuration.GetSection("AgentCheckConfig"));
+            OptionsOverride(services);
             services.ValidateConfig();
 
             services.AddSingleton<StateCollector>();
             services.AddSingleton<State>();
             services.AddSingleton<StateProjection>();
+        }
+
+        protected virtual void OptionsOverride(IServiceCollection services)
+        {
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

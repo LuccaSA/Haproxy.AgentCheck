@@ -20,7 +20,7 @@ namespace Haproxy.AgentCheck
             get
             {
                 var config = _options.CurrentValue;
-                return State.CpuPercent > config.CpuLimit || State.IisRequests > config.IisRequestsLimit;
+                return State.CpuPercent <= config.CpuLimit && State.IisRequests <= config.IisRequestsLimit;
             }
         }
 

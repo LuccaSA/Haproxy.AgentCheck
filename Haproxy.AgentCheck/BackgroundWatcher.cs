@@ -12,6 +12,7 @@ namespace Haproxy.AgentCheck
         private readonly IOptionsMonitor<AgentCheckConfig> _options;
         private IDisposable _disposableOptionHandler;
         private readonly StateCollector _stateCollector;
+
         public BackgroundWatcher(IOptionsMonitor<AgentCheckConfig> options,   StateCollector stateCollector)
         {
             _options = options;
