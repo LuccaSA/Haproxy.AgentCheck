@@ -1,5 +1,9 @@
 using System;
 using System.Runtime.InteropServices;
+using Haproxy.AgentCheck.Config;
+using Haproxy.AgentCheck.Endpoints;
+using Haproxy.AgentCheck.Hosting;
+using Haproxy.AgentCheck.Metrics;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;

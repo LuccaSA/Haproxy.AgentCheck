@@ -1,7 +1,8 @@
 using System;
+using Haproxy.AgentCheck.Config;
 using Microsoft.Extensions.Options;
 
-namespace Haproxy.AgentCheck
+namespace Haproxy.AgentCheck.Metrics
 {
     public class StateProjection
     {

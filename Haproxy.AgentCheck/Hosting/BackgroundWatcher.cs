@@ -1,10 +1,12 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Haproxy.AgentCheck.Config;
+using Haproxy.AgentCheck.Metrics;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 
-namespace Haproxy.AgentCheck
+namespace Haproxy.AgentCheck.Hosting
 {
     public class BackgroundWatcher : IHostedService, IDisposable
     {

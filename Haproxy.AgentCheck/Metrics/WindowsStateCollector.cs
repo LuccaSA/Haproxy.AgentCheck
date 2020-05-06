@@ -1,6 +1,6 @@
 using System.Diagnostics;
 
-namespace Haproxy.AgentCheck
+namespace Haproxy.AgentCheck.Metrics
 {
     public class WindowsStateCollector : IStateCollector
     {

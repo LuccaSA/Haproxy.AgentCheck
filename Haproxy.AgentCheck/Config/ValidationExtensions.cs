@@ -1,8 +1,9 @@
 using System;
 using System.Linq;
+using Haproxy.AgentCheck.Metrics;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Haproxy.AgentCheck
+namespace Haproxy.AgentCheck.Config
 {
     public static class ValidationExtensions
     {

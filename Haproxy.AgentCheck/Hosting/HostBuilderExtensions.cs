@@ -1,10 +1,11 @@
 using System;
 using System.Runtime.InteropServices;
+using Haproxy.AgentCheck.Endpoints;
 using Microsoft.AspNetCore.Connections;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 
-namespace Haproxy.AgentCheck
+namespace Haproxy.AgentCheck.Hosting
 {
     public static class HostBuilderExtensions
     {

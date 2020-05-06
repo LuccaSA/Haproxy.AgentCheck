@@ -1,6 +1,6 @@
 using System;
 
-namespace Haproxy.AgentCheck
+namespace Haproxy.AgentCheck.Config
 {
     public class AgentCheckConfigurationException : Exception
     {

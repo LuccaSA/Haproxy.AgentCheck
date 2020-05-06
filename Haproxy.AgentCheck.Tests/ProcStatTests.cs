@@ -1,4 +1,5 @@
 using System;
+using Haproxy.AgentCheck.Metrics;
 using Xunit;
 
 namespace Haproxy.AgentCheck.Tests

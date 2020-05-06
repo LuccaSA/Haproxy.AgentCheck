@@ -1,5 +1,7 @@
-﻿using System;
+using System;
 using System.Linq;
+using Haproxy.AgentCheck.Config;
+using Haproxy.AgentCheck.Metrics;
 using Xunit;
 
 namespace Haproxy.AgentCheck.Tests

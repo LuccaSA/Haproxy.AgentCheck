@@ -1,8 +1,11 @@
-﻿using System;
+using System;
 using System.Net.Http;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
+using Haproxy.AgentCheck.Config;
+using Haproxy.AgentCheck.Hosting;
+using Haproxy.AgentCheck.Metrics;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

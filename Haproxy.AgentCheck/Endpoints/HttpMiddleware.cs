@@ -1,8 +1,9 @@
 using System.Net;
 using System.Threading.Tasks;
+using Haproxy.AgentCheck.Metrics;
 using Microsoft.AspNetCore.Http;
 
-namespace Haproxy.AgentCheck
+namespace Haproxy.AgentCheck.Endpoints
 {
     public class HttpMiddleware
     {

@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 
-namespace Haproxy.AgentCheck
+namespace Haproxy.AgentCheck.Metrics
 {
     public class LinuxStateCollector : IStateCollector
     {

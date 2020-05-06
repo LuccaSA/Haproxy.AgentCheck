@@ -1,4 +1,4 @@
-namespace Haproxy.AgentCheck
+namespace Haproxy.AgentCheck.Metrics
 {
     public interface IStateCollector
     {

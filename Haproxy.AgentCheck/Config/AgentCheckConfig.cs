@@ -1,4 +1,6 @@
-namespace Haproxy.AgentCheck
+using Haproxy.AgentCheck.Metrics;
+
+namespace Haproxy.AgentCheck.Config
 {
     public class AgentCheckConfig
     {

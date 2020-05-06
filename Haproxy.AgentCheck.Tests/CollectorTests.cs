@@ -1,3 +1,4 @@
+using Haproxy.AgentCheck.Metrics;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 

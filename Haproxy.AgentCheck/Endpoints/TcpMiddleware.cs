@@ -1,9 +1,10 @@
 using System;
 using System.Text;
 using System.Threading.Tasks;
+using Haproxy.AgentCheck.Metrics;
 using Microsoft.AspNetCore.Connections;
 
-namespace Haproxy.AgentCheck
+namespace Haproxy.AgentCheck.Endpoints
 {
     public class TcpMiddleware : ConnectionHandler
     {
