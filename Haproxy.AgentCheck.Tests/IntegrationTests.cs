@@ -23,11 +23,13 @@ namespace Haproxy.AgentCheck.Tests
                     w.UseStartup<IntegrationStartup>()
                         .UseKestrelOnPorts(4412, 4414);
                 });
-            await hostBuilder.StartAsync();
+            using var host = await hostBuilder.StartAsync();
             await Task.Delay(TimeSpan.FromSeconds(2));
 
             await AssertTcpReports();
             await AssertHttpReports();
+
+            await host.StopAsync();
         }
 
         private async Task AssertHttpReports()
