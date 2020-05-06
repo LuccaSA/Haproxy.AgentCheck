@@ -2,7 +2,7 @@ using System.Diagnostics;
 
 namespace Haproxy.AgentCheck.Metrics
 {
-    public class WindowsStateCollector : IStateCollector
+    public sealed class WindowsStateCollector : IStateCollector
     {
         private readonly State _state;
         private readonly PerformanceCounter _cpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
@@ -17,6 +17,12 @@ namespace Haproxy.AgentCheck.Metrics
         {
             _state.CpuPercent = (int)_cpuCounter.NextValue();
             _state.IisRequests = (int)_iisRequests.NextValue();
+        }
+
+        public void Dispose()
+        {
+            _cpuCounter?.Dispose();
+            _iisRequests?.Dispose();
         }
     }
 }

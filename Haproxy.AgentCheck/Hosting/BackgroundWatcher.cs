@@ -8,7 +8,7 @@ using Microsoft.Extensions.Options;
 
 namespace Haproxy.AgentCheck.Hosting
 {
-    public class BackgroundWatcher : IHostedService, IDisposable
+    public sealed class BackgroundWatcher : IHostedService, IDisposable
     {
         private Timer _timer;
         private readonly IOptionsMonitor<AgentCheckConfig> _options;

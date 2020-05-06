@@ -37,10 +37,10 @@ namespace Haproxy.AgentCheck.Tests
 
         private async Task AssertHttpReports()
         {
-            var client = new HttpClient();
+            using var client = new HttpClient();
             client.BaseAddress = new Uri("http://localhost:4412");
 
-            var response = await client.GetAsync("/");
+            var response = await client.GetAsync(new Uri("/"));
             response.EnsureSuccessStatusCode();
 
             var content = await response.Content.ReadAsStringAsync();
@@ -50,7 +50,7 @@ namespace Haproxy.AgentCheck.Tests
 
         private static async Task AssertTcpReports()
         {
-            var client = new TcpClient("localhost", 4414);
+            using var client = new TcpClient("localhost", 4414);
             NetworkStream stream = client.GetStream();
 
             // request
@@ -80,6 +80,7 @@ namespace Haproxy.AgentCheck.Tests
     {
         public void Configure(AgentCheckConfig options)
         {
+            if (options == null) throw new ArgumentNullException(nameof(options));
             options.CpuLimit = 42;
             options.IisRequestsLimit = 42;
             options.RefreshIntervalInMs = 200;

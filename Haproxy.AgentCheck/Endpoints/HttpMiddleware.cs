@@ -1,3 +1,4 @@
+using System;
 using System.Net;
 using System.Threading.Tasks;
 using Haproxy.AgentCheck.Metrics;
@@ -16,6 +17,7 @@ namespace Haproxy.AgentCheck.Endpoints
 
         public async Task InvokeAsync(HttpContext context)
         {
+            if (context == null) throw new ArgumentNullException(nameof(context));
             context.Response.StatusCode = _stateProjection.IsServiceAvailable ? (int)HttpStatusCode.OK : (int)HttpStatusCode.ServiceUnavailable;
             await context.Response.WriteAsync($"CPU : {_stateProjection.State.CpuPercent}%\n");
             await context.Response.WriteAsync($"Requests : {_stateProjection.State.IisRequests}\n");

@@ -3,7 +3,7 @@ using System.IO;
 
 namespace Haproxy.AgentCheck.Metrics
 {
-    public class LinuxStateCollector : IStateCollector
+    public sealed class LinuxStateCollector : IStateCollector
     {
         private readonly State _state;
         private ProcStat _lastStat;
@@ -23,6 +23,10 @@ namespace Haproxy.AgentCheck.Metrics
 
             _lastStat = stat;
         }
+
+        public void Dispose()
+        {
+        }
     }
 
     internal class ProcStat
@@ -39,7 +43,7 @@ namespace Haproxy.AgentCheck.Metrics
             if (firstProcStatLine == null)
                 throw new ArgumentNullException(nameof(firstProcStatLine), "/proc/stat is returning invalid data");
 
-            if (firstProcStatLine.StartsWith("cpu ") != true)
+            if (firstProcStatLine.StartsWith("cpu ", StringComparison.OrdinalIgnoreCase) != true)
                 throw new ArgumentException("/proc/stat is returning invalid first line", nameof(firstProcStatLine));
 
             var span = firstProcStatLine.AsSpan();
