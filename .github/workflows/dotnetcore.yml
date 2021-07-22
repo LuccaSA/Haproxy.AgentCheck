@@ -20,7 +20,7 @@ jobs:
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 3.1.101
+        dotnet-version: '5.0.x'
 
     - name: Install dependencies
       run: dotnet restore
@@ -50,12 +50,12 @@ jobs:
 
     - name: Publish win10-x64
       run: |
-        dotnet publish Haproxy.AgentCheck/Haproxy.AgentCheck.csproj -r win10-x64 -c Release /p:Version="${{ steps.gitversion.outputs.majorMinorPatch }}" -o artifact/win10-x64
+        dotnet publish Haproxy.AgentCheck/Haproxy.AgentCheck.csproj -r win10-x64 /p:PublishSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=true -c Release /p:Version="${{ steps.gitversion.outputs.majorMinorPatch }}" -o artifact/win10-x64
         zip artifact/Haproxy.AgentCheck.win10-x64.${{ steps.gitversion.outputs.majorMinorPatch }}.zip -q -j artifact/win10-x64/*
 
     - name: Publish linux-x64
       run: |
-        dotnet publish Haproxy.AgentCheck/Haproxy.AgentCheck.csproj -r linux-x64 -c Release /p:Version="${{ steps.gitversion.outputs.majorMinorPatch }}" -o artifact/linux-x64
+        dotnet publish Haproxy.AgentCheck/Haproxy.AgentCheck.csproj -r linux-x64 /p:PublishSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=true -c Release /p:Version="${{ steps.gitversion.outputs.majorMinorPatch }}" -o artifact/linux-x64
         zip artifact/Haproxy.AgentCheck.linux-x64.${{ steps.gitversion.outputs.majorMinorPatch }}.zip -q -j artifact/linux-x64/*
 
     - uses: actions/upload-artifact@v2
