@@ -17,22 +17,27 @@ jobs:
     - uses: actions/checkout@v2
     - run: git fetch --prune --unshallow
 
-    - name: Setup .NET Core
+    - name: Setup .NET Core 3
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 3.1.101
+        dotnet-version: '3.1.x'
+
+    - name: Setup .NET Core 5
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '5.0.x'
 
     - name: Install dependencies
       run: dotnet restore
 
     - name: Install GitVersion
-      uses: gittools/actions/gitversion/setup@v0.9.2
+      uses: gittools/actions/gitversion/setup@v0.9.7
       with:
-          versionSpec: '5.2.0'
+          versionSpec: '5.5.0'
 
     - name: Use GitVersion
       id: gitversion # step id used as reference for output values
-      uses: gittools/actions/gitversion/execute@v0.9.2
+      uses: gittools/actions/gitversion/execute@v0.9.7
 
     - name: Setup SonarScanner
       run: dotnet tool install --tool-path artifacts dotnet-sonarscanner
@@ -50,12 +55,12 @@ jobs:
 
     - name: Publish win10-x64
       run: |
-        dotnet publish Haproxy.AgentCheck/Haproxy.AgentCheck.csproj -r win10-x64 -c Release /p:Version="${{ steps.gitversion.outputs.majorMinorPatch }}" -o artifact/win10-x64
+        dotnet publish Haproxy.AgentCheck/Haproxy.AgentCheck.csproj -r win10-x64 /p:PublishSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=true -c Release /p:Version="${{ steps.gitversion.outputs.majorMinorPatch }}" -o artifact/win10-x64
         zip artifact/Haproxy.AgentCheck.win10-x64.${{ steps.gitversion.outputs.majorMinorPatch }}.zip -q -j artifact/win10-x64/*
 
     - name: Publish linux-x64
       run: |
-        dotnet publish Haproxy.AgentCheck/Haproxy.AgentCheck.csproj -r linux-x64 -c Release /p:Version="${{ steps.gitversion.outputs.majorMinorPatch }}" -o artifact/linux-x64
+        dotnet publish Haproxy.AgentCheck/Haproxy.AgentCheck.csproj -r linux-x64 /p:PublishSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=true -c Release /p:Version="${{ steps.gitversion.outputs.majorMinorPatch }}" -o artifact/linux-x64
         zip artifact/Haproxy.AgentCheck.linux-x64.${{ steps.gitversion.outputs.majorMinorPatch }}.zip -q -j artifact/linux-x64/*
 
     - uses: actions/upload-artifact@v2
