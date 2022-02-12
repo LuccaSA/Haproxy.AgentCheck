@@ -1,7 +1,9 @@
 using System.Diagnostics;
+using System.Runtime.Versioning;
 
 namespace Haproxy.AgentCheck.Metrics
 {
+    [SupportedOSPlatform("windows")]
     public sealed class WindowsStateCollector : IStateCollector
     {
         private readonly State _state;

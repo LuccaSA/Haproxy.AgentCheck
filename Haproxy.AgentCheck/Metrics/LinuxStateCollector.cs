@@ -1,8 +1,10 @@
 using System;
 using System.IO;
+using System.Runtime.Versioning;
 
 namespace Haproxy.AgentCheck.Metrics
 {
+    [SupportedOSPlatform("linux")]
     public sealed class LinuxStateCollector : IStateCollector
     {
         private readonly State _state;
