@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using Haproxy.AgentCheck.Config;
 using Haproxy.AgentCheck.Endpoints;
@@ -21,6 +22,7 @@ namespace Haproxy.AgentCheck
             _configuration = configuration;
         }
 
+        [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = "<Pending>")]
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddHostedService<BackgroundWatcher>();
