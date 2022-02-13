@@ -6,28 +6,42 @@ using System.Threading.Tasks;
 using Haproxy.AgentCheck.Config;
 using Haproxy.AgentCheck.Hosting;
 using Haproxy.AgentCheck.Metrics;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Haproxy.AgentCheck.Tests
 {
     public class IntegrationTests
     {
+        private ITestOutputHelper _outputHelper { get; }
+
+        public IntegrationTests(ITestOutputHelper outputHelper)
+        {
+            _outputHelper = outputHelper;
+        }
+
         [Fact]
         public async Task StartAndGatherTcp()
         {
             var hostBuilder = new HostBuilder()
+                .ConfigureServices(s =>
+                {
+                    s.AddLogging(b => b.AddXUnit(_outputHelper));
+                })
                 .ConfigureWebHost(w =>
                 {
                     w.UseStartup<IntegrationStartup>()
                         .UseKestrelOnPorts(4412, 4414);
                 });
             using var host = await hostBuilder.StartAsync();
-            await Task.Delay(TimeSpan.FromSeconds(2));
+            //await Task.Delay(TimeSpan.FromSeconds(2));
 
             await AssertTcpReports();
             await AssertHttpReports();
@@ -68,6 +82,7 @@ namespace Haproxy.AgentCheck.Tests
             : base(configuration)
         {
         }
+
         protected override void OptionsOverride(IServiceCollection services)
         {
             services.ConfigureOptions<TestAgentCheckConfig>();

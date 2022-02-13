@@ -22,10 +22,10 @@ jobs:
       with:
         dotnet-version: '3.1.x'
 
-    - name: Setup .NET Core 5
+    - name: Setup .NET Core 6
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: '5.0.x'
+        dotnet-version: '6.0.x'
 
     - name: Install dependencies
       run: dotnet restore
@@ -46,7 +46,7 @@ jobs:
       run: artifacts/dotnet-sonarscanner begin /k:"Haproxy.AgentCheck" /o:"lucca" /d:sonar.login=${{ secrets.SONAR_TOKEN }} /d:sonar.host.url="https://sonarcloud.io/" /d:sonar.cs.opencover.reportsPaths="./coverage.opencover.xml"
 
     - name: Test
-      run: dotnet test --no-restore --verbosity minimal /p:CollectCoverage=true /p:CoverletOutput=../ /p:CoverletOutputFormat=opencover
+      run: dotnet test --no-restore --verbosity minimal /p:CollectCoverage=true /p:CoverletOutput=../ /p:CoverletOutputFormat=opencover --logger:"console;verbosity=detailed"
 
     - name: SonarScanner end
       run: artifacts/dotnet-sonarscanner end /d:sonar.login=${{ secrets.SONAR_TOKEN }}
@@ -55,12 +55,12 @@ jobs:
 
     - name: Publish win10-x64
       run: |
-        dotnet publish Haproxy.AgentCheck/Haproxy.AgentCheck.csproj -r win10-x64 /p:PublishSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=true -c Release /p:Version="${{ steps.gitversion.outputs.majorMinorPatch }}" -o artifact/win10-x64
+        dotnet publish Haproxy.AgentCheck/Haproxy.AgentCheck.csproj -r win10-x64 --self-contained /p:PublishSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=true -c Release /p:Version="${{ steps.gitversion.outputs.majorMinorPatch }}" -o artifact/win10-x64
         zip artifact/Haproxy.AgentCheck.win10-x64.${{ steps.gitversion.outputs.majorMinorPatch }}.zip -q -j artifact/win10-x64/*
 
     - name: Publish linux-x64
       run: |
-        dotnet publish Haproxy.AgentCheck/Haproxy.AgentCheck.csproj -r linux-x64 /p:PublishSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=true -c Release /p:Version="${{ steps.gitversion.outputs.majorMinorPatch }}" -o artifact/linux-x64
+        dotnet publish Haproxy.AgentCheck/Haproxy.AgentCheck.csproj -r linux-x64 --self-contained /p:PublishSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=true -c Release /p:Version="${{ steps.gitversion.outputs.majorMinorPatch }}" -o artifact/linux-x64
         zip artifact/Haproxy.AgentCheck.linux-x64.${{ steps.gitversion.outputs.majorMinorPatch }}.zip -q -j artifact/linux-x64/*
 
     - uses: actions/upload-artifact@v2
