@@ -46,7 +46,7 @@ jobs:
       run: artifacts/dotnet-sonarscanner begin /k:"Haproxy.AgentCheck" /o:"lucca" /d:sonar.login=${{ secrets.SONAR_TOKEN }} /d:sonar.host.url="https://sonarcloud.io/" /d:sonar.cs.opencover.reportsPaths="./coverage.opencover.xml"
 
     - name: Test
-      run: dotnet test --no-restore --verbosity minimal /p:CollectCoverage=true /p:CoverletOutput=../ /p:CoverletOutputFormat=opencover
+      run: dotnet test --no-restore --verbosity minimal /p:CollectCoverage=true /p:CoverletOutput=../ /p:CoverletOutputFormat=opencover --logger:"console;verbosity=detailed"
 
     - name: SonarScanner end
       run: artifacts/dotnet-sonarscanner end /d:sonar.login=${{ secrets.SONAR_TOKEN }}
