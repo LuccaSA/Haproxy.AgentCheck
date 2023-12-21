@@ -1,9 +1,6 @@
-using System;
+namespace Lucca.Infra.Haproxy.AgentCheck.Metrics;
 
-namespace Haproxy.AgentCheck.Metrics
+public interface IStateCollector
 {
-    public interface IStateCollector : IDisposable
-    {
-        void Collect();
-    }
+    void Collect();
 }

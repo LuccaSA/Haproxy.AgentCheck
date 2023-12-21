@@ -1,39 +1,53 @@
-using System;
 using System.Runtime.InteropServices;
-using Haproxy.AgentCheck.Endpoints;
+using Lucca.Infra.Haproxy.AgentCheck.Endpoints;
+using Lucca.Infra.Haproxy.AgentCheck.Metrics;
 using Microsoft.AspNetCore.Connections;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Hosting;
 
-namespace Haproxy.AgentCheck.Hosting
+namespace Lucca.Infra.Haproxy.AgentCheck.Hosting;
+
+internal static class HostBuilderExtensions
 {
-    public static class HostBuilderExtensions
+    public static void UseSystemService(this IHostBuilder hostBuilder)
     {
-        public static IHostBuilder UseSystemService(this IHostBuilder hostBuilder)
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                hostBuilder.UseWindowsService();
-                return hostBuilder;
-            }
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            {
-                hostBuilder.UseSystemd();
-                return hostBuilder;
-            }
-            throw new NotSupportedException("Unsupported platform");
+            hostBuilder.UseWindowsService();
+            return;
         }
-
-        public static IWebHostBuilder UseKestrelOnPorts(this IWebHostBuilder webHostBuilder, int http, int tcp)
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {
-            return webHostBuilder.UseKestrel((builder, options) =>
+            hostBuilder.UseSystemd();
+            return;
+        }
+        throw new NotSupportedException("Unsupported platform");
+    }
+
+    public static void UseKestrelOnPorts(this IWebHostBuilder webHostBuilder, int http, int tcp)
+    {
+        webHostBuilder.UseKestrel(options =>
+        {
+            options.ListenAnyIP(tcp, opt =>
             {
-                options.ListenAnyIP(tcp, opt =>
-                {
-                    opt.UseConnectionHandler<TcpMiddleware>();
-                });
-                options.ListenAnyIP(http);
+                opt.UseConnectionHandler<TcpMiddleware>();
             });
+            options.ListenAnyIP(http);
+        });
+    }
+
+    public static void AddMetricCollector(this IServiceCollection services)
+    {
+        services.AddSingleton<State>();
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            services.AddSingleton<IStateCollector, WindowsStateCollector>();
+        }
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            services.AddSingleton<IStateCollector, LinuxStateCollector>();
+        }
+        else
+        {
+            throw new PlatformNotSupportedException("Only windows and linux platforms are supported");
         }
     }
 }

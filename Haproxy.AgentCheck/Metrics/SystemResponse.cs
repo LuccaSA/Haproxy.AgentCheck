@@ -1,8 +1,7 @@
-namespace Haproxy.AgentCheck.Metrics
+namespace Lucca.Infra.Haproxy.AgentCheck.Metrics;
+
+internal enum SystemResponse
 {
-    public enum SystemResponse
-    {
-        Linear,
-        FirstOrder
-    }
+    Linear,
+    FirstOrder
 }

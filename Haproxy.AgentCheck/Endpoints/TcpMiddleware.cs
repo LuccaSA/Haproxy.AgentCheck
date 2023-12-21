@@ -1,27 +1,16 @@
-using System;
 using System.Text;
-using System.Threading.Tasks;
-using Haproxy.AgentCheck.Metrics;
+using Lucca.Infra.Haproxy.AgentCheck.Metrics;
 using Microsoft.AspNetCore.Connections;
 
-namespace Haproxy.AgentCheck.Endpoints
+namespace Lucca.Infra.Haproxy.AgentCheck.Endpoints;
+
+internal class TcpMiddleware(State state) : ConnectionHandler
 {
-    public class TcpMiddleware : ConnectionHandler
+    public override async Task OnConnectedAsync(ConnectionContext connection)
     {
-        private readonly StateProjection _stateProjection;
+        ArgumentNullException.ThrowIfNull(connection);
 
-        public TcpMiddleware(StateProjection computeLimits)
-        {
-            _stateProjection = computeLimits;
-        }
-
-        public override async Task OnConnectedAsync(ConnectionContext connection)
-        {
-            if (connection == null)
-                throw new ArgumentNullException(nameof(connection));
-
-            await connection.Transport.Output.WriteAsync(Encoding.ASCII.GetBytes($"up {_stateProjection.Weight}%\n").AsMemory());
-            await connection.Transport.Output.FlushAsync();
-        }
+        await connection.Transport.Output.WriteAsync(Encoding.ASCII.GetBytes($"{(state.IsReady ? "ready" : "maint")} {state.Weight}%\n").AsMemory(), connection.ConnectionClosed);
+        await connection.Transport.Output.FlushAsync(connection.ConnectionClosed);
     }
 }

@@ -1,19 +1,20 @@
-using Haproxy.AgentCheck.Metrics;
+using Lucca.Infra.Haproxy.AgentCheck.Hosting;
+using Lucca.Infra.Haproxy.AgentCheck.Metrics;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
-namespace Haproxy.AgentCheck.Tests
-{
-    public class CollectorTests
-    {
-        [Fact]
-        public void CollectTest()
-        {
-            ServiceCollection sc = new ServiceCollection();
-            sc.AddMetricCollector();
-            var collector = sc.BuildServiceProvider().GetRequiredService<IStateCollector>();
+namespace Lucca.Infra.Haproxy.AgentCheck.Tests;
 
-            collector.Collect();
-        }
+public class CollectorTests
+{
+    [Fact]
+    public void CollectTest()
+    {
+        var sc = new ServiceCollection();
+        sc.AddMetricCollector();
+        var collector = sc.BuildServiceProvider().GetRequiredService<IStateCollector>();
+
+        collector.Collect();
+        Assert.True(true);
     }
 }

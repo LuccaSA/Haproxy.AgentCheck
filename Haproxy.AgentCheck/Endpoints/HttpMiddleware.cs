@@ -1,28 +1,30 @@
-using System;
 using System.Net;
-using System.Threading.Tasks;
-using Haproxy.AgentCheck.Metrics;
-using Microsoft.AspNetCore.Http;
+using Lucca.Infra.Haproxy.AgentCheck.Metrics;
+using Microsoft.AspNetCore.Mvc;
 
-namespace Haproxy.AgentCheck.Endpoints
+namespace Lucca.Infra.Haproxy.AgentCheck.Endpoints;
+
+internal static class HttpMiddleware
 {
-    public class HttpMiddleware
+    public static IResult Invoke([FromServices] State state)
     {
-        private readonly StateProjection _stateProjection;
-
-        public HttpMiddleware(RequestDelegate _, StateProjection computeLimits)
+        IEnumerable<string> lines = [];
+        if (state.System is not null)
         {
-            _stateProjection = computeLimits;
+            lines = lines.Concat(new []
+            {
+                $"CPU : {state.System?.CpuPercent}%",
+                $"IIS Requests : {state.System?.IisRequests}"
+            });
         }
 
-        public async Task InvokeAsync(HttpContext context)
+        if (state.Counters is not null)
         {
-            if (context == null)
-                throw new ArgumentNullException(nameof(context));
-
-            context.Response.StatusCode = _stateProjection.IsServiceAvailable ? (int)HttpStatusCode.OK : (int)HttpStatusCode.ServiceUnavailable;
-            await context.Response.WriteAsync($"CPU : {_stateProjection.State.CpuPercent}%\n");
-            await context.Response.WriteAsync($"Requests : {_stateProjection.State.IisRequests}\n");
+            lines = lines.Concat(state.Counters.Values.Select(kvp => $"{kvp.Key}: {kvp.Value}"));
         }
+
+        var text = string.Join('\n', lines);
+        var statusCode = state.IsReady ? (int)HttpStatusCode.OK : (int)HttpStatusCode.ServiceUnavailable;
+        return Results.Text(text, statusCode: statusCode);
     }
 }

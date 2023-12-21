@@ -1,30 +1,26 @@
 using System.Diagnostics;
 using System.Runtime.Versioning;
 
-namespace Haproxy.AgentCheck.Metrics
+namespace Lucca.Infra.Haproxy.AgentCheck.Metrics;
+
+[SupportedOSPlatform("windows")]
+internal sealed class WindowsStateCollector(State state) : IStateCollector, IDisposable
 {
-    [SupportedOSPlatform("windows")]
-    public sealed class WindowsStateCollector : IStateCollector
+    private readonly PerformanceCounter _cpuCounter = new("Processor", "% Processor Time", "_Total");
+    private readonly PerformanceCounter _iisRequests = new(@"ASP.NET", "requests current", true);
+
+    public void Collect()
     {
-        private readonly State _state;
-        private readonly PerformanceCounter _cpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
-        private readonly PerformanceCounter _iisRequests = new PerformanceCounter(@"ASP.NET", "requests current", true);
-
-        public WindowsStateCollector(State state)
+        state.UpdateState(new SystemState
         {
-            _state = state;
-        }
+            CpuPercent = (int)_cpuCounter.NextValue(),
+            IisRequests = (int)_iisRequests.NextValue()
+        });
+    }
 
-        public void Collect()
-        {
-            _state.CpuPercent = (int)_cpuCounter.NextValue();
-            _state.IisRequests = (int)_iisRequests.NextValue();
-        }
-
-        public void Dispose()
-        {
-            _cpuCounter?.Dispose();
-            _iisRequests?.Dispose();
-        }
+    public void Dispose()
+    {
+        _cpuCounter.Dispose();
+        _iisRequests.Dispose();
     }
 }
