@@ -10,7 +10,13 @@ internal class TcpMiddleware(State state) : ConnectionHandler
     {
         ArgumentNullException.ThrowIfNull(connection);
 
-        await connection.Transport.Output.WriteAsync(Encoding.ASCII.GetBytes($"{(state.IsReady ? "ready" : "maint")} {state.Weight}%\n").AsMemory(), connection.ConnectionClosed);
+        var up = state.IsUp ? "up" : "down";
+        if (!state.IsUp)
+        {
+            up += $"#{state.BrokenCircuitsBreakers.Count} failures ({string.Join(",", state.BrokenCircuitsBreakers)})";
+        }
+
+        await connection.Transport.Output.WriteAsync(Encoding.ASCII.GetBytes($"{state.Weight}%\n {up}").AsMemory(), connection.ConnectionClosed);
         await connection.Transport.Output.FlushAsync(connection.ConnectionClosed);
     }
 }

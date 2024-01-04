@@ -24,7 +24,7 @@ internal static class HttpMiddleware
         }
 
         var text = string.Join('\n', lines);
-        var statusCode = state.IsReady ? (int)HttpStatusCode.OK : (int)HttpStatusCode.ServiceUnavailable;
+        var statusCode = state.IsUp ? (int)HttpStatusCode.OK : (int)HttpStatusCode.ServiceUnavailable;
         return Results.Text(text, statusCode: statusCode);
     }
 }

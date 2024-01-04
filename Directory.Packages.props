@@ -10,6 +10,12 @@
     <PackageVersion Include="Microsoft.Extensions.Diagnostics.Testing" Version="8.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Hosting.Systemd" Version="8.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Hosting.WindowsServices" Version="8.0.0" />
+    <PackageVersion Include="Serilog.AspNetCore" Version="8.0.0" />
+    <PackageVersion Include="Serilog.Enrichers.AssemblyName" Version="1.0.9" />
+    <PackageVersion Include="Serilog.Enrichers.Environment" Version="2.3.0" />
+    <PackageVersion Include="Serilog.Enrichers.Process" Version="2.0.2" />
+    <PackageVersion Include="Serilog.Settings.Configuration" Version="8.0.0" />
+    <PackageVersion Include="Serilog.Sinks.File" Version="5.0.0" />
     <PackageVersion Include="System.Diagnostics.PerformanceCounter" Version="8.0.0" />
     <PackageVersion Include="System.IO.Pipelines" Version="8.0.0" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
@@ -17,8 +23,8 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageVersion>
-    <PackageVersion Include="xunit" Version="2.6.3" />
-    <PackageVersion Include="xunit.runner.visualstudio" Version="2.5.5">
+    <PackageVersion Include="xunit" Version="2.6.4" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="2.5.6">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageVersion>

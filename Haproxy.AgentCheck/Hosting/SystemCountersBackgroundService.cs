@@ -19,8 +19,7 @@ internal sealed class SystemCountersBackgroundService(IOptionsMonitor<WatchConfi
 
     private void UpdateTimer(Timer timer)
     {
-        var period = TimeSpan.FromMilliseconds(optionsMonitor.CurrentValue.System.RefreshIntervalInMs);
-        timer.Change(TimeSpan.Zero, period);
+        timer.Change(TimeSpan.Zero, optionsMonitor.CurrentValue.SystemRefreshInterval);
     }
 
     private void OnTick(object? state)

@@ -14,7 +14,7 @@ public class IntegrationTests(ITestOutputHelper outputHelper)
     [Fact]
     public async Task StartAndGatherTcp()
     {
-        using var f = new WebApplicationFactory<Program>();
+        await using var f = new WebApplicationFactory<Program>();
         f.WithWebHostBuilder(b =>
         {
             b.ConfigureLogging(loggingBuilder =>
@@ -25,24 +25,8 @@ public class IntegrationTests(ITestOutputHelper outputHelper)
         });
         var client = f.CreateClient();
         var s = await client.GetStringAsync("");
-        Assert.Equal("CPU : 0%\nRequests : 0", s);
+        Assert.Equal("CPU : 0%\nIIS Requests : 0", s);
         Assert.True(true);
-        // var hostBuilder = new HostBuilder()
-        //     .ConfigureServices(s =>
-        //     {
-        //         s.AddLogging(b => b.AddXUnit(outputHelper));
-        //     })
-        //     .ConfigureWebHost(w =>
-        //     {
-        //         w.UseStartup<IntegrationStartup>()
-        //             .UseKestrelOnPorts(4412, 4414);
-        //     });
-        // using var host = await hostBuilder.StartAsync();
-        //
-        // await AssertTcpReports();
-        // await AssertHttpReports();
-        //
-        // await host.StopAsync();
     }
 
     private static async Task AssertHttpReports(HttpClient client)
@@ -52,7 +36,7 @@ public class IntegrationTests(ITestOutputHelper outputHelper)
 
         var content = await response.Content.ReadAsStringAsync();
         Assert.Contains("CPU", content);
-        Assert.Contains("Requests", content);
+        Assert.Contains("IIS Requests", content);
     }
 
     private static async Task AssertTcpReports()

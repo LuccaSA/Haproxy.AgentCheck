@@ -1,6 +1,7 @@
 ﻿namespace Lucca.Infra.Haproxy.AgentCheck.Hosting;
 
-internal partial class ProcessCountersBackgroundService
+#pragma warning disable S3881
+internal partial class MonitoringSession
 {
     [LoggerMessage(LogLevel.Error, "No process {processName} currently running.")]
     public static partial void LogNoProcessRunning(ILogger logger, string processName);
@@ -14,3 +15,4 @@ internal partial class ProcessCountersBackgroundService
     [LoggerMessage(LogLevel.Warning, "An error occured while watching process. Process may have ended, retrying.")]
     public static partial void LogProcessingException(ILogger logger, Exception e);
 }
+#pragma warning restore S3881

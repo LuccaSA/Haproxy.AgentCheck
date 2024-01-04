@@ -1,15 +1,19 @@
+using System.Diagnostics.Contracts;
 using Lucca.Infra.Haproxy.AgentCheck.Config;
 using Microsoft.Extensions.Options;
 
 namespace Lucca.Infra.Haproxy.AgentCheck.Metrics;
 
-internal partial class State(IOptionsMonitor<RulesConfig> options, ILogger<State> logger)
+internal partial class State(IOptionsMonitor<RulesConfig> options, ILogger<State> logger, TimeProvider timeProvider)
 {
     private readonly HashSet<string> _brokenCircuitBreakers = new(StringComparer.InvariantCultureIgnoreCase);
+    private readonly Dictionary<string, DateTimeOffset> _fixedCircuitBreakersAwaitingDelay = new(StringComparer.InvariantCultureIgnoreCase);
+
     public SystemState? System { get; private set; }
     public CountersState? Counters { get; private set; }
     public int Weight { get; private set; }
-    public bool IsReady { get; private set; }
+    public bool IsUp { get; private set; }
+    public IReadOnlyCollection<string> BrokenCircuitsBreakers => _brokenCircuitBreakers;
 
     public void UpdateState(SystemState state)
     {
@@ -26,11 +30,15 @@ internal partial class State(IOptionsMonitor<RulesConfig> options, ILogger<State
 
     private void RemoveMissingBrokenCircuits(CountersState state)
     {
-        var missingCircuitBreakers = _brokenCircuitBreakers.Where(name => !state.Values.ContainsKey($"{RuleSource.Counters}/{name}")).ToList();
+        var missingCircuitBreakers = _brokenCircuitBreakers
+            .Where(name => name.StartsWith(nameof(RuleSource.Counters), StringComparison.InvariantCultureIgnoreCase))
+            .Where(name => !state.Values.ContainsKey($"{RuleSource.Counters}/{name}"))
+            .ToList();
         foreach (var name in missingCircuitBreakers)
         {
             LogCircuitBreakerRemoved(logger, name);
             _brokenCircuitBreakers.Remove(name);
+            _fixedCircuitBreakersAwaitingDelay.Remove(name);
         }
     }
 
@@ -48,27 +56,17 @@ internal partial class State(IOptionsMonitor<RulesConfig> options, ILogger<State
 
             if (rule.Weight is not null)
             {
-                weight = Math.Min(weight, ComputeWeight(value.Value, rule.Weight));
+                ComputeWeight(ref weight, value.Value, rule.Weight);
             }
 
-            if (rule.Maintenance is not null)
+            if (rule.Failure is not null)
             {
-                if (value > rule.Maintenance.EnterThreshold && _brokenCircuitBreakers.Add(key))
-                {
-                    LogBrokenCircuitBreaker(logger, key);
-                }
-
-                if (value < rule.Maintenance.LeaveThreshold && _brokenCircuitBreakers.Remove(key))
-                {
-                    LogFixedCircuitBreaker(logger, key);
-                }
-
-                isDown = isDown || _brokenCircuitBreakers.Contains(key);
+                ComputeStatus(ref isDown, key, value.Value, rule.Failure);
             }
         }
 
         Weight = weight;
-        IsReady = !isDown;
+        IsUp = !isDown;
     }
 
     private int? GetValueForRule(RuleConfig rule)
@@ -82,28 +80,80 @@ internal partial class State(IOptionsMonitor<RulesConfig> options, ILogger<State
         };
     }
 
-    private static int ComputeWeight(int currentValue, RuleWeight ruleWeight)
+    private void ComputeStatus(ref bool isDown, string ruleName, int currentValue, FailureRule failureRule)
     {
-        const double k = 4.61;
-        return Math.Clamp(ruleWeight.SystemResponse switch
+        if (currentValue > failureRule.EnterThreshold)
         {
-            SystemResponse.Linear => (int)((ruleWeight.Max - currentValue) / (double)ruleWeight.Max * 100),
-            SystemResponse.FirstOrder => (int)Math.Ceiling(Math.Exp(-currentValue * k / ruleWeight.Max) * 100),
-            _ => throw new NotSupportedException()
-        }, 0, 100);
+            _fixedCircuitBreakersAwaitingDelay.Remove(ruleName);
+            if (_brokenCircuitBreakers.Add(ruleName))
+            {
+                LogBrokenCircuitBreaker(logger, ruleName);
+            }
+        }
+        else if (currentValue < failureRule.LeaveThreshold)
+        {
+            if (!_brokenCircuitBreakers.Contains(ruleName))
+            {
+                return;
+            }
+
+            bool isFixed = false;
+            if (failureRule.LeaveAfter is { } leaveAfter)
+            {
+                if (_fixedCircuitBreakersAwaitingDelay.TryGetValue(ruleName, out var time) && time <= timeProvider.GetUtcNow())
+                {
+                    isFixed = true;
+                }
+                else if (!_fixedCircuitBreakersAwaitingDelay.ContainsKey(ruleName))
+                {
+                    var awaitingUntil = timeProvider.GetUtcNow().Add(leaveAfter);
+                    _fixedCircuitBreakersAwaitingDelay[ruleName] = awaitingUntil;
+                    LogFixedCircuitBreakerAwaitingDelay(logger, ruleName, awaitingUntil);
+                }
+            }
+            else
+            {
+                isFixed = true;
+            }
+
+            if (isFixed && _brokenCircuitBreakers.Remove(ruleName))
+            {
+                LogFixedCircuitBreaker(logger, ruleName);
+            }
+        }
+        else if (_fixedCircuitBreakersAwaitingDelay.TryGetValue(ruleName, out var awaitingUntil))
+        {
+            LogBrokenCircuitBreakerWhileAwaitingDelay(logger, ruleName, awaitingUntil);
+            _fixedCircuitBreakersAwaitingDelay.Remove(ruleName);
+        }
+
+        isDown = isDown || _brokenCircuitBreakers.Contains(ruleName);
     }
-}
 
-internal partial class State
-{
-    [LoggerMessage(LogLevel.Information, "Circuit breaker {circuitBreaker} is now broken.")]
-    static partial void LogBrokenCircuitBreaker(ILogger logger, string circuitBreaker);
+    private static void ComputeWeight(ref int weight, int currentValue, WeightRule weightRule)
+    {
+        var computedWeight = weightRule.SystemResponse switch
+        {
+            SystemResponse.Linear => ComputeLinearResponse(currentValue, weightRule),
+            SystemResponse.FirstOrder => ComputeFirstOrderResponse(currentValue, weightRule),
+            _ => throw new NotSupportedException()
+        };
 
-    [LoggerMessage(LogLevel.Information, "Circuit breaker {circuitBreaker} is now fixed.")]
-    static partial void LogFixedCircuitBreaker(ILogger logger, string circuitBreaker);
+        weight = Math.Min(weight, Math.Clamp(computedWeight, weightRule.MinWeight, weightRule.MaxWeight));
+    }
 
-    [LoggerMessage(LogLevel.Information, "Circuit breaker {circuitBreaker} was removed.")]
-    static partial void LogCircuitBreakerRemoved(ILogger logger, string circuitBreaker);
+    [Pure]
+    private static int ComputeFirstOrderResponse(int currentValue, WeightRule weightRule)
+    {
+        var k = -Math.Log(1d / (weightRule.MaxWeight - weightRule.MinWeight + 1));
+        return (int)((weightRule.MaxWeight - weightRule.MinWeight + 1) * Math.Exp(-((currentValue - weightRule.MinValue) * k) / (weightRule.MaxValue - weightRule.MinValue)) + weightRule.MinWeight - 1);
+    }
+
+    [Pure]
+    private static int ComputeLinearResponse(int currentValue, WeightRule weightRule)
+    {
+        return (int)(1d * (weightRule.MaxValue - currentValue) / (weightRule.MaxValue - weightRule.MinValue) * (weightRule.MaxWeight - weightRule.MinWeight) + weightRule.MinWeight);
+    }
 }
 
 internal record SystemState
