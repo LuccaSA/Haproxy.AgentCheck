@@ -34,19 +34,19 @@ jobs:
       id: gitversion # step id used as reference for output values
       uses: gittools/actions/gitversion/execute@v0.9.15
 
-    - name: Setup SonarScanner
-      run: dotnet tool install --tool-path artifacts dotnet-sonarscanner
+#    - name: Setup SonarScanner
+#      run: dotnet tool install --tool-path artifacts dotnet-sonarscanner
 
-    - name: SonarScanner begin
-      run: artifacts/dotnet-sonarscanner begin /k:"Haproxy.AgentCheck" /o:"lucca" /d:sonar.login=${{ secrets.SONAR_TOKEN }} /d:sonar.host.url="https://sonarcloud.io/" /d:sonar.cs.opencover.reportsPaths="./coverage.opencover.xml"
+#    - name: SonarScanner begin
+#      run: artifacts/dotnet-sonarscanner begin /k:"Haproxy.AgentCheck" /o:"lucca" /d:sonar.login=${{ secrets.SONAR_TOKEN }} /d:sonar.host.url="https://sonarcloud.io/" /d:sonar.cs.opencover.reportsPaths="./coverage.opencover.xml"
 
     - name: Test
       run: dotnet test --no-restore --verbosity minimal /p:CollectCoverage=true /p:CoverletOutput=../ /p:CoverletOutputFormat=opencover --logger:"console;verbosity=detailed"
 
-    - name: SonarScanner end
-      run: artifacts/dotnet-sonarscanner end /d:sonar.login=${{ secrets.SONAR_TOKEN }}
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#    - name: SonarScanner end
+#      run: artifacts/dotnet-sonarscanner end /d:sonar.login=${{ secrets.SONAR_TOKEN }}
+#      env:
+#        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Publish win10-x64
       run: |
