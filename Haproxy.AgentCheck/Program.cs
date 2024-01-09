@@ -1,8 +1,10 @@
 #pragma warning disable CA1506
+using Lucca.Infra.Haproxy.AgentCheck;
 using Lucca.Infra.Haproxy.AgentCheck.Config;
 using Lucca.Infra.Haproxy.AgentCheck.Endpoints;
 using Lucca.Infra.Haproxy.AgentCheck.Hosting;
 using Lucca.Infra.Haproxy.AgentCheck.Metrics;
+using Microsoft.AspNetCore.Mvc;
 using Serilog;
 using Serilog.Core;
 
@@ -23,9 +25,18 @@ builder.Services.AddOptions<RulesConfig>()
     .ValidateDataAnnotations();
 builder.Services.AddMetricCollector();
 builder.Services.AddSingleton<State>();
+builder.Services.AddSingleton<MaintenanceStatus>();
 builder.Services.AddSingleton(TimeProvider.System);
 var app = builder.Build();
 app.MapGet("", HttpMiddleware.Invoke);
+app.MapPost("/maintenance", ([FromServices]MaintenanceStatus status) =>
+{
+    status.IsMaintenance = true;
+});
+app.MapPost("/ready", ([FromServices]MaintenanceStatus status) =>
+{
+    status.IsMaintenance = false;
+});
 await app.RunAsync();
 
 static Logger CreateLoggerConfiguration(IConfiguration configuration)
@@ -46,6 +57,11 @@ namespace Lucca.Infra.Haproxy.AgentCheck
 {
     public partial class Program
     {
+    }
+
+    public class MaintenanceStatus
+    {
+        public bool IsMaintenance { get; set; }
     }
 }
 #pragma warning restore S1118
