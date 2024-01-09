@@ -58,7 +58,6 @@ Currently, two system responses are available :
 - `FirstOrder` : weight is a first order system response. Best suited for heterogeneous environments, where
 
 Example with a 80% limit :
-
 ![System Response](/docs/system_response.png)
 
 All curves are crafted to return `100%` when x = 0, and `1%` when x = limit. (x is the current metric value, like CPU%). Returning 1 is a safety to avoid a full backend drain (happening if we return 0).
