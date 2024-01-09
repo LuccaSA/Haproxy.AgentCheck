@@ -1,103 +1,58 @@
-using System;
-using System.Net.Http;
 using System.Net.Sockets;
 using System.Text;
-using System.Threading.Tasks;
-using Haproxy.AgentCheck.Config;
-using Haproxy.AgentCheck.Hosting;
-using Haproxy.AgentCheck.Metrics;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
+using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Haproxy.AgentCheck.Tests
+namespace Lucca.Infra.Haproxy.AgentCheck.Tests;
+#pragma warning disable S1144
+#pragma warning disable S125
+public class IntegrationTests(ITestOutputHelper outputHelper)
 {
-    public class IntegrationTests
+    [Fact]
+    public async Task StartAndGatherTcp()
     {
-        private ITestOutputHelper _outputHelper { get; }
-
-        public IntegrationTests(ITestOutputHelper outputHelper)
+        await using var f = new WebApplicationFactory<Program>();
+        f.WithWebHostBuilder(b =>
         {
-            _outputHelper = outputHelper;
-        }
-
-        [Fact]
-        public async Task StartAndGatherTcp()
-        {
-            var hostBuilder = new HostBuilder()
-                .ConfigureServices(s =>
-                {
-                    s.AddLogging(b => b.AddXUnit(_outputHelper));
-                })
-                .ConfigureWebHost(w =>
-                {
-                    w.UseStartup<IntegrationStartup>()
-                        .UseKestrelOnPorts(4412, 4414);
-                });
-            using var host = await hostBuilder.StartAsync();
-            //await Task.Delay(TimeSpan.FromSeconds(2));
-
-            await AssertTcpReports();
-            await AssertHttpReports();
-
-            await host.StopAsync();
-        }
-
-        private static async Task AssertHttpReports()
-        {
-            using var client = new HttpClient();
-            var response = await client.GetAsync(new Uri("http://localhost:4412/"));
-            response.EnsureSuccessStatusCode();
-
-            var content = await response.Content.ReadAsStringAsync();
-            Assert.Contains("CPU", content);
-            Assert.Contains("Requests", content);
-        }
-
-        private static async Task AssertTcpReports()
-        {
-            using var client = new TcpClient("localhost", 4414);
-            NetworkStream stream = client.GetStream();
-
-            // request
-            await stream.WriteAsync(Encoding.ASCII.GetBytes(""));
-            // response
-            var buffer = new byte[8].AsMemory();
-            await stream.ReadAsync(buffer);
-
-            var response = Encoding.ASCII.GetString(buffer.Span);
-            Assert.StartsWith("up", response);
-        }
+            b.ConfigureLogging(loggingBuilder =>
+            {
+                loggingBuilder.ClearProviders();
+                loggingBuilder.AddFakeLogging(o => { o.OutputSink = outputHelper.WriteLine; });
+            });
+        });
+        var client = f.CreateClient();
+        var s = await client.GetStringAsync("");
+        Assert.Equal("CPU : 0%\nIIS Requests : 0", s);
+        Assert.True(true);
     }
 
-    public class IntegrationStartup : Startup
+    private static async Task AssertHttpReports(HttpClient client)
     {
-        public IntegrationStartup(IConfiguration configuration)
-            : base(configuration)
-        {
-        }
+        var response = await client.GetAsync("");
+        response.EnsureSuccessStatusCode();
 
-        protected override void OptionsOverride(IServiceCollection services)
-        {
-            services.ConfigureOptions<TestAgentCheckConfig>();
-        }
+        var content = await response.Content.ReadAsStringAsync();
+        Assert.Contains("CPU", content);
+        Assert.Contains("IIS Requests", content);
     }
 
-    public class TestAgentCheckConfig : IConfigureOptions<AgentCheckConfig>
+    private static async Task AssertTcpReports()
     {
-        public void Configure(AgentCheckConfig options)
-        {
-            if (options == null) throw new ArgumentNullException(nameof(options));
-            options.CpuLimit = 42;
-            options.IisRequestsLimit = 42;
-            options.RefreshIntervalInMs = 200;
-            options.SystemResponse = SystemResponse.FirstOrder;
-        }
+        using var client = new TcpClient("localhost", 4414);
+        NetworkStream stream = client.GetStream();
+
+        // request
+        await stream.WriteAsync(Encoding.ASCII.GetBytes(""));
+        // response
+        var buffer = new byte[8].AsMemory();
+        await stream.ReadAsync(buffer);
+
+        var response = Encoding.ASCII.GetString(buffer.Span);
+        Assert.StartsWith("up", response);
     }
 }
+#pragma warning restore S1114
+#pragma warning disable S125

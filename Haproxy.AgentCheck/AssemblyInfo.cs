@@ -1,3 +1,3 @@
 ﻿using System.Runtime.CompilerServices;
 
-[assembly: InternalsVisibleTo("Haproxy.AgentCheck.Tests")]
+[assembly: InternalsVisibleTo("Lucca.Infra.Haproxy.AgentCheck.Tests")]
