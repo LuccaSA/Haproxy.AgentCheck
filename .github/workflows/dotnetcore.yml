@@ -48,10 +48,10 @@ jobs:
 #      env:
 #        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Publish win10-x64
+    - name: Publish win-x64
       run: |
-        dotnet publish Haproxy.AgentCheck/Haproxy.AgentCheck.csproj -r win10-x64 --self-contained /p:PublishSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=true -c Release /p:Version="${{ steps.gitversion.outputs.majorMinorPatch }}" -o artifact/win10-x64
-        zip artifact/Haproxy.AgentCheck.win10-x64.${{ steps.gitversion.outputs.majorMinorPatch }}.zip -q -j artifact/win10-x64/*
+        dotnet publish Haproxy.AgentCheck/Haproxy.AgentCheck.csproj -r win-x64 --self-contained /p:PublishSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=true -c Release /p:Version="${{ steps.gitversion.outputs.majorMinorPatch }}" -o artifact/win-x64
+        zip artifact/Haproxy.AgentCheck.win-x64.${{ steps.gitversion.outputs.majorMinorPatch }}.zip -q -j artifact/win-x64/*
 
     - name: Publish linux-x64
       run: |
@@ -61,7 +61,7 @@ jobs:
     - uses: actions/upload-artifact@v2
       with:
         name: 'Haproxy.AgentCheck.win10-x64.${{ steps.gitversion.outputs.majorMinorPatch }}.zip'
-        path: 'artifact/Haproxy.AgentCheck.win10-x64.${{ steps.gitversion.outputs.majorMinorPatch }}.zip'
+        path: 'artifact/Haproxy.AgentCheck.win-x64.${{ steps.gitversion.outputs.majorMinorPatch }}.zip'
 
     - uses: actions/upload-artifact@v2
       with:
@@ -80,15 +80,15 @@ jobs:
         draft: false
         prerelease: false
 
-    - name: Upload win10-x64
+    - name: Upload win-x64
       if: startsWith(github.ref, 'refs/tags/v')
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./artifact/Haproxy.AgentCheck.win10-x64.${{ steps.gitversion.outputs.majorMinorPatch }}.zip
-        asset_name: Haproxy.AgentCheck.win10-x64.${{ steps.gitversion.outputs.majorMinorPatch }}.zip
+        asset_path: ./artifact/Haproxy.AgentCheck.win-x64.${{ steps.gitversion.outputs.majorMinorPatch }}.zip
+        asset_name: Haproxy.AgentCheck.win-x64.${{ steps.gitversion.outputs.majorMinorPatch }}.zip
         asset_content_type: application/zip
 
     - name: Upload linux-x64
