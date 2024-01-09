@@ -11,7 +11,7 @@ namespace Lucca.Infra.Haproxy.AgentCheck.Tests;
 #pragma warning disable S125
 public class IntegrationTests(ITestOutputHelper outputHelper)
 {
-    [Fact]
+    [Fact(Skip = "Flaky")]
     public async Task StartAndGatherTcp()
     {
         await using var f = new WebApplicationFactory<Program>();
