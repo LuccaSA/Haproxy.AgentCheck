@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Connections;
 
 namespace Lucca.Infra.Haproxy.AgentCheck.Endpoints;
 
-internal class TcpMiddleware(State state, MaintenanceStatus maintenanceStatus) : ConnectionHandler
+internal class TcpHandler(State state, MaintenanceStatus maintenanceStatus) : ConnectionHandler
 {
     public override async Task OnConnectedAsync(ConnectionContext connection)
     {

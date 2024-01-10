@@ -1,10 +1,10 @@
 #pragma warning disable CA1506
 using Lucca.Infra.Haproxy.AgentCheck;
+using Lucca.Infra.Haproxy.AgentCheck.Authentication;
 using Lucca.Infra.Haproxy.AgentCheck.Config;
 using Lucca.Infra.Haproxy.AgentCheck.Endpoints;
 using Lucca.Infra.Haproxy.AgentCheck.Hosting;
 using Lucca.Infra.Haproxy.AgentCheck.Metrics;
-using Microsoft.AspNetCore.Mvc;
 using Serilog;
 using Serilog.Core;
 
@@ -27,16 +27,13 @@ builder.Services.AddMetricCollector();
 builder.Services.AddSingleton<State>();
 builder.Services.AddSingleton<MaintenanceStatus>();
 builder.Services.AddSingleton(TimeProvider.System);
+builder.Services.AddAuthentication().AddBasic("Basic");
+builder.Services.AddAuthorization();
 var app = builder.Build();
-app.MapGet("", HttpMiddleware.Invoke);
-app.MapPost("/maintenance", ([FromServices]MaintenanceStatus status) =>
-{
-    status.IsMaintenance = true;
-});
-app.MapPost("/ready", ([FromServices]MaintenanceStatus status) =>
-{
-    status.IsMaintenance = false;
-});
+app.MapGet("", HttpHandler.Invoke);
+var adminGroup = app.MapGroup("/admin").RequireAuthorization();
+adminGroup.MapPost("/maintenance", MaintenanceHandler.SetInMaintenance);
+adminGroup.MapPost("/ready", MaintenanceHandler.SetReady);
 await app.RunAsync();
 
 static Logger CreateLoggerConfiguration(IConfiguration configuration)
@@ -51,17 +48,11 @@ static Logger CreateLoggerConfiguration(IConfiguration configuration)
         .CreateLogger();
 }
 
+
 #pragma warning restore CA1506
-#pragma warning disable S1118
 namespace Lucca.Infra.Haproxy.AgentCheck
 {
     public partial class Program
     {
     }
-
-    public class MaintenanceStatus
-    {
-        public bool IsMaintenance { get; set; }
-    }
 }
-#pragma warning restore S1118

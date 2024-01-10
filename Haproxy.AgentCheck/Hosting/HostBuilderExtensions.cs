@@ -28,7 +28,7 @@ internal static class HostBuilderExtensions
         {
             options.ListenAnyIP(tcp, opt =>
             {
-                opt.UseConnectionHandler<TcpMiddleware>();
+                opt.UseConnectionHandler<TcpHandler>();
             });
             options.ListenAnyIP(http);
         });
