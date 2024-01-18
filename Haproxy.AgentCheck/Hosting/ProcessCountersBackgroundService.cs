@@ -26,6 +26,8 @@ internal partial class ProcessCountersBackgroundService(
             ["EventCounterIntervalSec"] = "1"
         };
 
+        bool? processFound = default;
+
         while (!stoppingToken.IsCancellationRequested)
         {
             var providers = rulesConfigMonitor.CurrentValue
@@ -51,14 +53,20 @@ internal partial class ProcessCountersBackgroundService(
             switch (processes)
             {
                 case { Count: 0 }:
-                    LogNoProcessRunning(logger, processName);
+                    if (processFound != false)
+                    {
+                        LogNoProcessRunning(logger, processName);
+                    }
+                    processFound = false;
                     await Task.Delay(TimeSpan.FromSeconds(15), stoppingToken);
                     continue;
                 case { Count: 1 }:
+                    processFound = true;
                     process = processes[0];
                     LogOneProcessRunning(logger, process.ProcessName, process.ProcessId);
                     break;
                 default:
+                    processFound = true;
                     process = processes[0];
                     LogMoreThanOneProcessRunning(logger, process.ProcessName, process.ProcessId, processes.Count);
                     break;
