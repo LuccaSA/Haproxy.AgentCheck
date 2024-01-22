@@ -8,17 +8,24 @@ internal class TcpHandler(State state, MaintenanceStatus maintenanceStatus) : Co
 {
     public override async Task OnConnectedAsync(ConnectionContext connection)
     {
-        ArgumentNullException.ThrowIfNull(connection);
-
-        var up = state.IsUp ? "up" : "down";
-        if (!state.IsUp)
+        try
         {
-            up += $"#{state.BrokenCircuitsBreakers.Count} failures ({string.Join(",", state.BrokenCircuitsBreakers)})";
+            ArgumentNullException.ThrowIfNull(connection);
+
+            var up = state.IsUp ? "up" : "down";
+            if (!state.IsUp)
+            {
+                up += $"#{state.BrokenCircuitsBreakers.Count} failures ({string.Join(",", state.BrokenCircuitsBreakers)})";
+            }
+
+            var isMaintenance = maintenanceStatus.IsMaintenance ? "maint" : "ready";
+
+            await connection.Transport.Output.WriteAsync(Encoding.ASCII.GetBytes($"{state.Weight}% {isMaintenance} {up}\n").AsMemory(), connection.ConnectionClosed);
+            await connection.Transport.Output.FlushAsync(connection.ConnectionClosed);
         }
-
-        var isMaintenance = maintenanceStatus.IsMaintenance ? "maint" : "ready";
-
-        await connection.Transport.Output.WriteAsync(Encoding.ASCII.GetBytes($"{state.Weight}% {isMaintenance} {up}\n").AsMemory(), connection.ConnectionClosed);
-        await connection.Transport.Output.FlushAsync(connection.ConnectionClosed);
+        catch (TaskCanceledException) when (connection.ConnectionClosed.IsCancellationRequested)
+        {
+            // ignore when connection is closed
+        }
     }
 }
