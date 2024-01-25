@@ -33,6 +33,7 @@ internal partial class ProcessCountersBackgroundService(
             var providers = rulesConfigMonitor.CurrentValue
                 .Where(rule => rule.Source == RuleSource.Counters)
                 .Select(rule => rule.Name.Split('/')[0])
+                .Concat(watchConfigMonitor.CurrentValue.DataSources)
                 .Distinct(StringComparer.InvariantCultureIgnoreCase)
                 .Select(name => new EventPipeProvider(name, EventLevel.Informational, (long)ClrTraceEventParser.Keywords.None, eventPipeArgs))
                 .ToList();
