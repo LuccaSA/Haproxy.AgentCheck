@@ -5,21 +5,18 @@ using Microsoft.Diagnostics.Tracing;
 namespace Lucca.Infra.Haproxy.AgentCheck.Hosting;
 
 #pragma warning disable S3881
-internal partial class MonitoringSession : IDisposable
+internal partial class MonitoringSession
 {
+    private readonly IEnumerable<EventPipeProvider> _providers;
     private readonly ILogger _logger;
     private readonly Dictionary<string, int> _counters = [];
-    private readonly EventPipeSession _session;
-    private readonly EventPipeEventSource _source;
 
     public MonitoringSession(string processName, int processId, IEnumerable<EventPipeProvider> providers, ILogger logger)
     {
         ProcessName = processName;
         ProcessId = processId;
+        _providers = providers;
         _logger = logger;
-        var diagnosticsClient = new DiagnosticsClient(ProcessId);
-        _session = diagnosticsClient.StartEventPipeSession(providers);
-        _source = new EventPipeEventSource(_session.EventStream);
     }
 
     public string ProcessName { get; }
@@ -29,17 +26,20 @@ internal partial class MonitoringSession : IDisposable
 
     public async Task ListenAsync(CancellationToken cancellationToken)
     {
+        var diagnosticsClient = new DiagnosticsClient(ProcessId);
+        using var session = diagnosticsClient.StartEventPipeSession(_providers);
+        using var source = new EventPipeEventSource(session.EventStream);
         cancellationToken.Register(() =>
         {
-            _source.StopProcessing();
-            _session.Stop();
+            source.StopProcessing();
+            session.Stop();
         });
 
-        _source.Dynamic.All += OnTraceEvent;
+        source.Dynamic.All += OnTraceEvent;
 
         try
         {
-            await Task.Factory.StartNew(() => _source.Process(), cancellationToken, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+            await Task.Factory.StartNew(() => source.Process(), cancellationToken, TaskCreationOptions.LongRunning, TaskScheduler.Default);
         }
         catch (Exception e)
         {
@@ -47,9 +47,8 @@ internal partial class MonitoringSession : IDisposable
         }
         finally
         {
-            _source.Dynamic.All -= OnTraceEvent;
+            source.Dynamic.All -= OnTraceEvent;
             SessionEnded?.Invoke(this);
-            Dispose();
         }
     }
 
@@ -61,15 +60,17 @@ internal partial class MonitoringSession : IDisposable
         var payload = (IDictionary<string, object>)((IDictionary<string, object>)obj.PayloadValue(0))["Payload"];
         if (((string)payload["CounterType"]).Equals("Mean", StringComparison.OrdinalIgnoreCase))
         {
-            _counters[$"{providerName}/{(string)payload["Name"]}"] = Convert.ToInt32(payload["Mean"], CultureInfo.InvariantCulture);
+            _counters[$"{providerName}/{(string)payload["Name"]}"] =
+                payload["Mean"] switch
+                {
+                    long and > int.MaxValue => int.MaxValue,
+                    float and > int.MaxValue => int.MaxValue,
+                    double and > int.MaxValue => int.MaxValue,
+                    int i => i,
+                    _ => Convert.ToInt32(payload["Mean"], CultureInfo.InvariantCulture)
+                };
             CountersUpdated?.Invoke(this, _counters);
         }
-    }
-
-    public void Dispose()
-    {
-        _session.Dispose();
-        _source.Dispose();
     }
 }
 #pragma warning restore S3881
