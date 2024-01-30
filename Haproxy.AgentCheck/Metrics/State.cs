@@ -11,7 +11,7 @@ internal partial class State(IOptionsMonitor<RulesConfig> options, ILogger<State
 
     public SystemState? System { get; private set; }
     public CountersState? Counters { get; private set; }
-    public int Weight { get; private set; }
+    public double Weight { get; private set; }
     public bool IsUp { get; private set; }
     public IReadOnlyCollection<string> BrokenCircuitsBreakers => _brokenCircuitBreakers;
 
@@ -44,8 +44,8 @@ internal partial class State(IOptionsMonitor<RulesConfig> options, ILogger<State
 
     private void ComputeState()
     {
-        int weight = 100;
-        bool isDown = false;
+        var  weight = 100d;
+        var isDown = false;
 
         foreach (var rule in options.CurrentValue)
         {
@@ -69,18 +69,18 @@ internal partial class State(IOptionsMonitor<RulesConfig> options, ILogger<State
         IsUp = !isDown;
     }
 
-    private int? GetValueForRule(RuleConfig rule)
+    private double? GetValueForRule(RuleConfig rule)
     {
         return rule switch
         {
             { Source: RuleSource.System, Name: "CPU" } when System is not null => System.CpuPercent,
             { Source: RuleSource.System, Name: "IisRequests" } when System is not null => System.IisRequests,
             { Source: RuleSource.Counters } when Counters is not null && Counters.Values.TryGetValue(rule.Name, out var counterValue) => counterValue,
-            _ => default(int?)
+            _ => default(double?)
         };
     }
 
-    private void ComputeStatus(ref bool isDown, string ruleName, int currentValue, FailureRule failureRule)
+    private void ComputeStatus(ref bool isDown, string ruleName, double currentValue, FailureRule failureRule)
     {
         if (currentValue > failureRule.EnterThreshold)
         {
@@ -130,7 +130,7 @@ internal partial class State(IOptionsMonitor<RulesConfig> options, ILogger<State
         isDown = isDown || _brokenCircuitBreakers.Contains(ruleName);
     }
 
-    private static void ComputeWeight(ref int weight, int currentValue, WeightRule weightRule)
+    private static void ComputeWeight(ref double weight, double currentValue, WeightRule weightRule)
     {
         var computedWeight = weightRule.SystemResponse switch
         {
@@ -143,26 +143,26 @@ internal partial class State(IOptionsMonitor<RulesConfig> options, ILogger<State
     }
 
     [Pure]
-    private static int ComputeFirstOrderResponse(int currentValue, WeightRule weightRule)
+    private static double ComputeFirstOrderResponse(double currentValue, WeightRule weightRule)
     {
         var k = -Math.Log(1d / (weightRule.MaxWeight - weightRule.MinWeight + 1));
-        return (int)((weightRule.MaxWeight - weightRule.MinWeight + 1) * Math.Exp(-((currentValue - weightRule.MinValue) * k) / (weightRule.MaxValue - weightRule.MinValue)) + weightRule.MinWeight - 1);
+        return (weightRule.MaxWeight - weightRule.MinWeight + 1) * Math.Exp(-((currentValue - weightRule.MinValue) * k) / (weightRule.MaxValue - weightRule.MinValue)) + weightRule.MinWeight - 1;
     }
 
     [Pure]
-    private static int ComputeLinearResponse(int currentValue, WeightRule weightRule)
+    private static double ComputeLinearResponse(double currentValue, WeightRule weightRule)
     {
-        return (int)(1d * (weightRule.MaxValue - currentValue) / (weightRule.MaxValue - weightRule.MinValue) * (weightRule.MaxWeight - weightRule.MinWeight) + weightRule.MinWeight);
+        return 1d * (weightRule.MaxValue - currentValue) / (weightRule.MaxValue - weightRule.MinValue) * (weightRule.MaxWeight - weightRule.MinWeight) + weightRule.MinWeight;
     }
 }
 
 internal record SystemState
 {
-    public int CpuPercent { get; init; }
-    public int IisRequests { get; init; }
+    public double CpuPercent { get; init; }
+    public double IisRequests { get; init; }
 }
 
 internal record CountersState
 {
-    public Dictionary<string, int> Values { get; init; } = new(StringComparer.InvariantCultureIgnoreCase);
+    public Dictionary<string, double> Values { get; init; } = new(StringComparer.InvariantCultureIgnoreCase);
 }

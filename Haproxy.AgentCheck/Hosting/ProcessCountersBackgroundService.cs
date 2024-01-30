@@ -77,7 +77,7 @@ internal partial class ProcessCountersBackgroundService(
             session.CountersUpdated += OnCountersUpdated;
             await session.ListenAsync(stoppingToken);
 
-            void OnCountersUpdated(MonitoringSession monitoringSession, Dictionary<string, int> counters)
+            void OnCountersUpdated(MonitoringSession monitoringSession, Dictionary<string, double> counters)
             {
                 state.UpdateState(new CountersState { Values = counters });
             }

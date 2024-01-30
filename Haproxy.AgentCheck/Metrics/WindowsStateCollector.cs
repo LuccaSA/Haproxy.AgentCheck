@@ -13,8 +13,8 @@ internal sealed class WindowsStateCollector(State state) : IStateCollector, IDis
     {
         state.UpdateState(new SystemState
         {
-            CpuPercent = (int)_cpuCounter.NextValue(),
-            IisRequests = (int)_iisRequests.NextValue()
+            CpuPercent = _cpuCounter.NextValue(),
+            IisRequests = _iisRequests.NextValue()
         });
     }
 

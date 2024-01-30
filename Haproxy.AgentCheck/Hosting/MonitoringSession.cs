@@ -9,7 +9,7 @@ internal partial class MonitoringSession
 {
     private readonly IEnumerable<EventPipeProvider> _providers;
     private readonly ILogger _logger;
-    private readonly Dictionary<string, int> _counters = [];
+    private readonly Dictionary<string, double> _counters = [];
 
     public MonitoringSession(string processName, int processId, IEnumerable<EventPipeProvider> providers, ILogger logger)
     {
@@ -21,7 +21,7 @@ internal partial class MonitoringSession
 
     public string ProcessName { get; }
     public int ProcessId { get; }
-    public event Action<MonitoringSession, Dictionary<string, int>>? CountersUpdated;
+    public event Action<MonitoringSession, Dictionary<string, double>>? CountersUpdated;
     public event Action<MonitoringSession>? SessionEnded;
 
     public async Task ListenAsync(CancellationToken cancellationToken)
@@ -60,15 +60,7 @@ internal partial class MonitoringSession
         var payload = (IDictionary<string, object>)((IDictionary<string, object>)obj.PayloadValue(0))["Payload"];
         if (((string)payload["CounterType"]).Equals("Mean", StringComparison.OrdinalIgnoreCase))
         {
-            _counters[$"{providerName}/{(string)payload["Name"]}"] =
-                payload["Mean"] switch
-                {
-                    long and > int.MaxValue => int.MaxValue,
-                    float and > int.MaxValue => int.MaxValue,
-                    double and > int.MaxValue => int.MaxValue,
-                    int i => i,
-                    _ => Convert.ToInt32(payload["Mean"], CultureInfo.InvariantCulture)
-                };
+            _counters[$"{providerName}/{(string)payload["Name"]}"] = Convert.ToDouble(payload["Mean"], CultureInfo.InvariantCulture);
             CountersUpdated?.Invoke(this, _counters);
         }
     }

@@ -42,7 +42,7 @@ public class ProcStatTests
 
         var cpuUsage = ProcStat.FromLine(first).AverageCpuWith(ProcStat.FromLine(second));
 
-        Assert.Equal(26, cpuUsage);
+        Assert.Equal(25.41, cpuUsage, 0.01);
     }
 
     [Fact]

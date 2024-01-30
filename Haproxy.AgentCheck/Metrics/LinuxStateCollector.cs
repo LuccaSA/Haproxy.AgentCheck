@@ -52,7 +52,7 @@ internal class ProcStat
         return new ProcStat(stats);
     }
 
-    internal int AverageCpuWith(ProcStat with) => 100 - (int)Math.Floor((Idle - with.Idle) * 100 / (double)(Total - with.Total));
+    internal double AverageCpuWith(ProcStat with) => 100d * (1 - 1d * (Idle - with.Idle) / (Total - with.Total));
 
     public static ProcStat Empty { get; } = new ProcStat(new int[7]);
 

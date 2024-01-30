@@ -37,7 +37,7 @@ public class StateTests(ITestOutputHelper testOutputHelper)
         var sut = serviceProvider.GetRequiredService<State>();
         sut.UpdateState(new SystemState { CpuPercent = data.Value });
         Assert.True(sut.IsUp);
-        Assert.Equal(data.ExpectedWeight, sut.Weight);
+        Assert.Equal(data.ExpectedWeight, sut.Weight, 0.01);
     }
 
     [Theory]
@@ -61,7 +61,7 @@ public class StateTests(ITestOutputHelper testOutputHelper)
         var sut = serviceProvider.GetRequiredService<State>();
         sut.UpdateState(new SystemState { CpuPercent = data.Value });
         Assert.True(sut.IsUp);
-        Assert.Equal(data.ExpectedWeight, sut.Weight);
+        Assert.Equal(data.ExpectedWeight, sut.Weight, 0.01);
     }
 
     [Fact]
@@ -289,7 +289,7 @@ public class StateTests(ITestOutputHelper testOutputHelper)
 
             new(0, 100, 10, 80, 0, 100),
             new(10, 100, 10, 80, 0, 100),
-            new(50, 42, 10, 80, 0, 100),
+            new(50, 42.85, 10, 80, 0, 100),
             new(80, 0, 10, 80, 0, 100),
             new(100, 0, 10, 80, 0, 100)
         };
@@ -300,16 +300,16 @@ public class StateTests(ITestOutputHelper testOutputHelper)
         return new TheoryData<WeightRuleData>
         {
             new(0, 100, 0, 100, 0, 100),
-            new(50, 9, 0, 100, 0, 100),
+            new(50, 9.05, 0, 100, 0, 100),
             new(100, 0, 0, 100, 0, 100),
 
             new(0, 80, 0, 100, 10, 80),
-            new(50, 17, 0, 100, 10, 80),
+            new(50, 17.42, 0, 100, 10, 80),
             new(100, 10, 0, 100, 10, 80),
 
             new(0, 100, 10, 80, 0, 100),
             new(10, 100, 10, 80, 0, 100),
-            new(45, 9, 10, 80, 0, 100),
+            new(45, 9.05, 10, 80, 0, 100),
             new(80, 0, 10, 80, 0, 100),
             new(100, 0, 10, 80, 0, 100)
         };
@@ -328,7 +328,7 @@ public class StateTests(ITestOutputHelper testOutputHelper)
     }
 }
 
-public record WeightRuleData(int Value, int ExpectedWeight, int MinValue, int MaxValue, int MinWeight, int MaxWeight)
+public record WeightRuleData(double Value, double ExpectedWeight, double MinValue, double MaxValue, double MinWeight, double MaxWeight)
 {
     public override string ToString()
     {
