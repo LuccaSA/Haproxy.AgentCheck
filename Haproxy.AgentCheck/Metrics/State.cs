@@ -31,8 +31,8 @@ internal partial class State(IOptionsMonitor<RulesConfig> options, ILogger<State
     private void RemoveMissingBrokenCircuits(CountersState state)
     {
         var missingCircuitBreakers = _brokenCircuitBreakers
-            .Where(name => name.StartsWith(nameof(RuleSource.Counters), StringComparison.InvariantCultureIgnoreCase))
-            .Where(name => !state.Values.ContainsKey($"{RuleSource.Counters}/{name}"))
+                .Where(name => name.StartsWith(nameof(RuleSource.Counters), StringComparison.InvariantCultureIgnoreCase))
+                .Where(name => !state.Values.ContainsKey(name[(name.IndexOf('/', StringComparison.InvariantCultureIgnoreCase) + 1)..]))
             .ToList();
         foreach (var name in missingCircuitBreakers)
         {
@@ -44,7 +44,7 @@ internal partial class State(IOptionsMonitor<RulesConfig> options, ILogger<State
 
     private void ComputeState()
     {
-        var  weight = 100d;
+        var weight = 100d;
         var isDown = false;
 
         foreach (var rule in options.CurrentValue)

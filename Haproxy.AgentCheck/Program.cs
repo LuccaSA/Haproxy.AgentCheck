@@ -21,8 +21,10 @@ builder.Services.AddOptions<WatchConfig>()
     .ValidateDataAnnotations();
 builder.Services.AddOptions<RulesConfig>()
     .BindConfiguration("Rules")
+    .Validate(rules => rules.TrueForAll(r => !string.IsNullOrWhiteSpace(r.Name) && (r.Weight is not null || r.Failure is not null)), "Invalid rules")
     .ValidateOnStart()
     .ValidateDataAnnotations();
+
 builder.Services.AddMetricCollector();
 builder.Services.AddSingleton<State>();
 builder.Services.AddSingleton<MaintenanceStatus>();

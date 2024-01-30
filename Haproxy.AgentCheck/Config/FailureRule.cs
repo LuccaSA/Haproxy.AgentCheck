@@ -2,7 +2,7 @@
 
 internal class FailureRule
 {
-    public int EnterThreshold { get; set; }
-    public int LeaveThreshold { get; set; }
+    public double EnterThreshold { get; set; }
+    public double LeaveThreshold { get; set; }
     public TimeSpan? LeaveAfter { get; set; }
 }
