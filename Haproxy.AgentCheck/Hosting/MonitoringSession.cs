@@ -26,19 +26,21 @@ internal partial class MonitoringSession
 
     public async Task ListenAsync(CancellationToken cancellationToken)
     {
+        EventPipeSession? session = default;
+        EventPipeEventSource? source = default;
         var diagnosticsClient = new DiagnosticsClient(ProcessId);
-        using var session = diagnosticsClient.StartEventPipeSession(_providers);
-        using var source = new EventPipeEventSource(session.EventStream);
-        cancellationToken.Register(() =>
-        {
-            source.StopProcessing();
-            session.Stop();
-        });
-
-        source.Dynamic.All += OnTraceEvent;
-
         try
         {
+            session = diagnosticsClient.StartEventPipeSession(_providers);
+            source = new EventPipeEventSource(session.EventStream);
+            await using var registration = cancellationToken.Register(() =>
+            {
+                source?.StopProcessing();
+                session?.Stop();
+            });
+
+            source.Dynamic.All += OnTraceEvent;
+
             await Task.Factory.StartNew(() => source.Process(), cancellationToken, TaskCreationOptions.LongRunning, TaskScheduler.Default);
         }
         catch (Exception e)
@@ -47,7 +49,12 @@ internal partial class MonitoringSession
         }
         finally
         {
-            source.Dynamic.All -= OnTraceEvent;
+            if (source is not null)
+            {
+                source.Dynamic.All -= OnTraceEvent;
+            }
+            source?.Dispose();
+            session?.Dispose();
             SessionEnded?.Invoke(this);
         }
     }
