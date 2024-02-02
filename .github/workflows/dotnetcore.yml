@@ -14,11 +14,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@ee0669bd1cc54295c223e0bb666b733df41de1c5 # v2
     - run: git fetch --prune --unshallow
 
     - name: Setup .NET Core 8
-      uses: actions/setup-dotnet@v1
+      uses: actions/setup-dotnet@608ee757cfcce72c2e91e99aca128e0cae67de87 # v1
       with:
         dotnet-version: '8.0.x'
 
@@ -26,13 +26,13 @@ jobs:
       run: dotnet restore
 
     - name: Install GitVersion
-      uses: gittools/actions/gitversion/setup@v0.9.15
+      uses: gittools/actions/gitversion/setup@31b3198b2de324472547fecec2c0f721b70c38e2 # v0.9.15
       with:
           versionSpec: '5.11.1'
 
     - name: Use GitVersion
       id: gitversion # step id used as reference for output values
-      uses: gittools/actions/gitversion/execute@v0.9.15
+      uses: gittools/actions/gitversion/execute@31b3198b2de324472547fecec2c0f721b70c38e2 # v0.9.15
 
 #    - name: Setup SonarScanner
 #      run: dotnet tool install --tool-path artifacts dotnet-sonarscanner
@@ -58,12 +58,12 @@ jobs:
         dotnet publish Haproxy.AgentCheck/Haproxy.AgentCheck.csproj -r linux-x64 --self-contained /p:PublishSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=true -c Release /p:Version="${{ steps.gitversion.outputs.majorMinorPatch }}" -o artifact/linux-x64
         zip artifact/Haproxy.AgentCheck.linux-x64.${{ steps.gitversion.outputs.majorMinorPatch }}.zip -q -j artifact/linux-x64/*
 
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@82c141cc518b40d92cc801eee768e7aafc9c2fa2 # v2
       with:
         name: 'Haproxy.AgentCheck.win10-x64.${{ steps.gitversion.outputs.majorMinorPatch }}.zip'
         path: 'artifact/Haproxy.AgentCheck.win-x64.${{ steps.gitversion.outputs.majorMinorPatch }}.zip'
 
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@82c141cc518b40d92cc801eee768e7aafc9c2fa2 # v2
       with:
         name: 'Haproxy.AgentCheck.linux-x64.${{ steps.gitversion.outputs.majorMinorPatch }}.zip'
         path: 'artifact/Haproxy.AgentCheck.linux-x64.${{ steps.gitversion.outputs.majorMinorPatch }}.zip'
@@ -71,7 +71,7 @@ jobs:
     - name: Create Release on tag
       if: startsWith(github.ref, 'refs/tags/v')
       id: create_release
-      uses: actions/create-release@v1
+      uses: actions/create-release@0cb9c9b65d5d1901c1f53e5e66eaf4afd303e70e # v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
@@ -82,7 +82,7 @@ jobs:
 
     - name: Upload win-x64
       if: startsWith(github.ref, 'refs/tags/v')
-      uses: actions/upload-release-asset@v1
+      uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
@@ -93,7 +93,7 @@ jobs:
 
     - name: Upload linux-x64
       if: startsWith(github.ref, 'refs/tags/v')
-      uses: actions/upload-release-asset@v1
+      uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
