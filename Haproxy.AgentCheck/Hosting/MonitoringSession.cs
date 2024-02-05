@@ -28,9 +28,10 @@ internal partial class MonitoringSession
     {
         EventPipeSession? session = default;
         EventPipeEventSource? source = default;
-        var diagnosticsClient = new DiagnosticsClient(ProcessId);
+
         try
         {
+            var diagnosticsClient = new DiagnosticsClient(ProcessId);
             session = diagnosticsClient.StartEventPipeSession(_providers);
             source = new EventPipeEventSource(session.EventStream);
             await using var registration = cancellationToken.Register(() =>
