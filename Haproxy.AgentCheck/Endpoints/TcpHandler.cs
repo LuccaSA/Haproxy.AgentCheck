@@ -18,9 +18,12 @@ internal class TcpHandler(State state, MaintenanceStatus maintenanceStatus) : Co
                 up += $"#{state.BrokenCircuitsBreakers.Count} failures ({string.Join(",", state.BrokenCircuitsBreakers)})";
             }
 
-            var isMaintenance = maintenanceStatus.IsMaintenance ? "maint" : "ready";
+            if (maintenanceStatus.IsMaintenance)
+            {
+                up = "stopped#Requested maintenance";
+            }
 
-            await connection.Transport.Output.WriteAsync(Encoding.ASCII.GetBytes($"{state.Weight:F0}% {isMaintenance} {up}\n").AsMemory(), connection.ConnectionClosed);
+            await connection.Transport.Output.WriteAsync(Encoding.ASCII.GetBytes($"{state.Weight:F0}% {up}\n").AsMemory(), connection.ConnectionClosed);
             await connection.Transport.Output.FlushAsync(connection.ConnectionClosed);
         }
         catch (TaskCanceledException) when (connection.ConnectionClosed.IsCancellationRequested)
