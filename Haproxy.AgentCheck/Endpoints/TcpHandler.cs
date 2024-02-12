@@ -15,12 +15,12 @@ internal class TcpHandler(State state, MaintenanceStatus maintenanceStatus) : Co
             var up = state.IsUp ? "up" : "down";
             if (!state.IsUp)
             {
-                up += $"#{state.BrokenCircuitsBreakers.Count} failures ({string.Join(",", state.BrokenCircuitsBreakers)})";
+                up += $" #{state.BrokenCircuitsBreakers.Count} failures ({string.Join(",", state.BrokenCircuitsBreakers)})";
             }
 
             if (maintenanceStatus.IsMaintenance)
             {
-                up = "stopped#Requested maintenance";
+                up = "stopped #Requested maintenance";
             }
 
             await connection.Transport.Output.WriteAsync(Encoding.ASCII.GetBytes($"{state.Weight:F0}% {up}\n").AsMemory(), connection.ConnectionClosed);
