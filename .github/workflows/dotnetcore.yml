@@ -26,13 +26,13 @@ jobs:
       run: dotnet restore
 
     - name: Install GitVersion
-      uses: gittools/actions/gitversion/setup@a41619580c25efb59dfc062e92990914141abcad # v0.10.2
+      uses: gittools/actions/gitversion/setup@c368911c8982846e30b6855f79e579104849bfc3 # v0.13.6
       with:
           versionSpec: '5.11.1'
 
     - name: Use GitVersion
       id: gitversion # step id used as reference for output values
-      uses: gittools/actions/gitversion/execute@a41619580c25efb59dfc062e92990914141abcad # v0.10.2
+      uses: gittools/actions/gitversion/execute@c368911c8982846e30b6855f79e579104849bfc3 # v0.13.6
 
 #    - name: Setup SonarScanner
 #      run: dotnet tool install --tool-path artifacts dotnet-sonarscanner
