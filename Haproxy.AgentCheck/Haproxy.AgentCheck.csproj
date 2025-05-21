@@ -20,4 +20,26 @@
     <PackageReference Include="System.Diagnostics.PerformanceCounter" />
     <PackageReference Include="System.IO.Pipelines" />
   </ItemGroup>
+
+  <ItemGroup>
+    <PackageVersion Update="Microsoft.CodeAnalysis.BannedApiAnalyzers" Version="4.14.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Update="Microsoft.CodeAnalysis.BannedApiAnalyzers">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageVersion Update="SonarAnalyzer.CSharp" Version="10.10.0.116381" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Update="SonarAnalyzer.CSharp">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
 </Project>
