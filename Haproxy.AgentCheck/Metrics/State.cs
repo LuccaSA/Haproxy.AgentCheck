@@ -1,4 +1,5 @@
 using System.Diagnostics.Contracts;
+using System.Diagnostics.Metrics;
 using Lucca.Infra.Haproxy.AgentCheck.Config;
 using Microsoft.Extensions.Options;
 
@@ -6,6 +7,11 @@ namespace Lucca.Infra.Haproxy.AgentCheck.Metrics;
 
 internal partial class State(IOptionsMonitor<RulesConfig> options, ILogger<State> logger, TimeProvider timeProvider)
 {
+    private static readonly Gauge<int> UpGauge = Instrumentation.Sources.Meter.CreateGauge<int>("agent_check_up");
+    private static readonly Gauge<double> WeightGauge = Instrumentation.Sources.Meter.CreateGauge<double>("agent_check_weight");
+    private static readonly Gauge<int> RuleUpGauge = Instrumentation.Sources.Meter.CreateGauge<int>("agent_check_rule_up");
+    private static readonly Gauge<double> RuleWeightGauge = Instrumentation.Sources.Meter.CreateGauge<double>("agent_check_rule_weight");
+
     private readonly HashSet<string> _brokenCircuitBreakers = new(StringComparer.InvariantCultureIgnoreCase);
     private readonly Dictionary<string, DateTimeOffset> _fixedCircuitBreakersAwaitingDelay = new(StringComparer.InvariantCultureIgnoreCase);
 
@@ -56,17 +62,24 @@ internal partial class State(IOptionsMonitor<RulesConfig> options, ILogger<State
 
             if (rule.Weight is not null)
             {
-                ComputeWeight(ref weight, value.Value, rule.Weight);
+                var ruleWeight = ComputeWeight(value.Value, rule.Weight);
+                RuleWeightGauge.Record(ruleWeight, new KeyValuePair<string, object?>("rule", key));
+                weight = Math.Min(weight, ruleWeight);
             }
 
             if (rule.Failure is not null)
             {
-                ComputeStatus(ref isDown, key, value.Value, rule.Failure);
+                var circuitBrokenIsDown = ComputeStatus(key, value.Value, rule.Failure);
+                RuleUpGauge.Record(circuitBrokenIsDown ? 0 : 1, new KeyValuePair<string, object?>("rule", key));
+                isDown |= circuitBrokenIsDown;
             }
         }
 
+
         Weight = weight;
         IsUp = !isDown;
+        UpGauge.Record(IsUp ? 1 : 0);
+        WeightGauge.Record(Weight);
     }
 
     private double? GetValueForRule(RuleConfig rule)
@@ -80,7 +93,7 @@ internal partial class State(IOptionsMonitor<RulesConfig> options, ILogger<State
         };
     }
 
-    private void ComputeStatus(ref bool isDown, string ruleName, double currentValue, FailureRule failureRule)
+    private bool ComputeStatus(string ruleName, double currentValue, FailureRule failureRule)
     {
         if (currentValue > failureRule.EnterThreshold)
         {
@@ -94,7 +107,7 @@ internal partial class State(IOptionsMonitor<RulesConfig> options, ILogger<State
         {
             if (!_brokenCircuitBreakers.Contains(ruleName))
             {
-                return;
+                return false;
             }
 
             bool isFixed = false;
@@ -127,10 +140,10 @@ internal partial class State(IOptionsMonitor<RulesConfig> options, ILogger<State
             _fixedCircuitBreakersAwaitingDelay.Remove(ruleName);
         }
 
-        isDown = isDown || _brokenCircuitBreakers.Contains(ruleName);
+        return _brokenCircuitBreakers.Contains(ruleName);
     }
 
-    private static void ComputeWeight(ref double weight, double currentValue, WeightRule weightRule)
+    private static double ComputeWeight(double currentValue, WeightRule weightRule)
     {
         var computedWeight = weightRule.SystemResponse switch
         {
@@ -139,7 +152,7 @@ internal partial class State(IOptionsMonitor<RulesConfig> options, ILogger<State
             _ => throw new NotSupportedException()
         };
 
-        weight = Math.Min(weight, Math.Clamp(computedWeight, weightRule.MinWeight, weightRule.MaxWeight));
+        return Math.Clamp(computedWeight, weightRule.MinWeight, weightRule.MaxWeight);
     }
 
     [Pure]

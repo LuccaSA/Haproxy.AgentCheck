@@ -12,14 +12,15 @@ internal static class HostBuilderExtensions
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
             hostBuilder.UseWindowsService();
-            return;
         }
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {
             hostBuilder.UseSystemd();
-            return;
         }
-        throw new NotSupportedException("Unsupported platform");
+        else
+        {
+            throw new NotSupportedException("Unsupported platform");
+        }
     }
 
     public static void UseKestrelOnPorts(this IWebHostBuilder webHostBuilder, int http, int tcp)
