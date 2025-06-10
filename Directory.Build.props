@@ -1,19 +1,20 @@
 <Project>
+
   <PropertyGroup>
-    <AssemblyName>Lucca.Infra.$(MSBuildProjectName)</AssemblyName>
+    <Product>Infra</Product>
+    <Company>Lucca</Company>
+    <Authors>Lucca</Authors>
+    <Description>Haproxy agent-check probe, a feedback loop to adjust backend's weight</Description>
+    <Copyright>Lucca - $([System.DateTime]::Now.Year)</Copyright>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <AssemblyName>$(Company).$(Product).$(MSBuildProjectName)</AssemblyName>
     <RootNamespace>$(AssemblyName)</RootNamespace>
     <Nullable>enable</Nullable>
     <ImplicitUsings>true</ImplicitUsings>
     <LangVersion>latest</LangVersion>
     <Features>strict</Features>
-  </PropertyGroup>
-
-  <PropertyGroup>
-    <Product>Infra.LuccaProxy</Product>
-    <Company>Lucca</Company>
-    <Authors>Lucca</Authors>
-    <Description>Haproxy agent-check probe, a feedback loop to adjust backend's weight</Description>
-    <Copyright>Lucca - $([System.DateTime]::Now.Year)</Copyright>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -31,5 +32,14 @@
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <Deterministic>true</Deterministic>
   </PropertyGroup>
+
+  <Target Name="AddAssemblyMetadata" AfterTargets="InitializeSourceControlInformationFromSourceControlManager">
+    <ItemGroup>
+      <AssemblyMetadata Include="RepositoryRevision" Value="$(SourceRevisionId)"/>
+      <AssemblyMetadata Include="ResourceServiceNamespace" Value="$(Company).$(Product)" />
+      <AssemblyMetadata Include="ResourceServiceName" Value="$(MSBuildProjectName)" />
+      <AssemblyMetadata Include="ResourceServiceTeam" Value="Platform Tooling" />
+    </ItemGroup>
+  </Target>
 
 </Project>

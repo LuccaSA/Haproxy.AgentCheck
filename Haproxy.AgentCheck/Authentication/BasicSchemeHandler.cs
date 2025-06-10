@@ -7,13 +7,10 @@ using Microsoft.Extensions.Options;
 
 namespace Lucca.Infra.Haproxy.AgentCheck.Authentication;
 
-public class BasicSchemeHandler : AuthenticationHandler<BasicSchemeOptions>
+public class BasicSchemeHandler(IOptionsMonitor<BasicSchemeOptions> options, ILoggerFactory logger, UrlEncoder encoder)
+    : AuthenticationHandler<BasicSchemeOptions>(options, logger, encoder)
 {
     private const string Basic = "Basic";
-    public BasicSchemeHandler(IOptionsMonitor<BasicSchemeOptions> options, ILoggerFactory logger, UrlEncoder encoder)
-        : base(options, logger, encoder)
-    {
-    }
 
     protected override Task<AuthenticateResult> HandleAuthenticateAsync()
     {
