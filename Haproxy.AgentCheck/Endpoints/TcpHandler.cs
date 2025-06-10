@@ -30,10 +30,5 @@ internal class TcpHandler(State state, MaintenanceStatus maintenanceStatus) : Co
         {
             // ignore when connection is closed
         }
-        finally
-        {
-            connection.Abort();
-            await connection.DisposeAsync();
-        }
     }
 }
