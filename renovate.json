@@ -1,6 +1,4 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "local>LuccaSA/renovate-config"
-  ]
+  "extends": ["github>luccasa/renovate-config", "github>luccasa/renovate-config:platform"]
 }
