@@ -28,6 +28,6 @@
     </PackageVersion>
   </ItemGroup>
   <ItemGroup>
-    <GlobalPackageReference Include="SonarAnalyzer.CSharp" Version="10.11.0.117924" />
+    <GlobalPackageReference Include="SonarAnalyzer.CSharp" Version="10.13.0.120203" />
   </ItemGroup>
 </Project>
