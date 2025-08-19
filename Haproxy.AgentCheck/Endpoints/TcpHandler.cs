@@ -25,6 +25,9 @@ internal class TcpHandler(State state, MaintenanceStatus maintenanceStatus) : Co
 
             await connection.Transport.Output.WriteAsync(Encoding.ASCII.GetBytes($"{state.Weight:F0}% {up}\n").AsMemory(), connection.ConnectionClosed);
             await connection.Transport.Output.FlushAsync(connection.ConnectionClosed);
+
+            await connection.Transport.Output.CompleteAsync();
+            await connection.Transport.Input.CompleteAsync();
         }
         catch (TaskCanceledException) when (connection.ConnectionClosed.IsCancellationRequested)
         {
