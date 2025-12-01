@@ -17,10 +17,10 @@ jobs:
     - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
     - run: git fetch --prune --unshallow
 
-    - name: Setup .NET Core 8
+    - name: Setup .NET 10
       uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4
       with:
-        dotnet-version: '8.0.x'
+        dotnet-version: '10.0.x'
 
     - name: Install dependencies
       run: dotnet restore

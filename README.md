@@ -6,7 +6,7 @@
 [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=Haproxy.AgentCheck&metric=security_rating)](https://sonarcloud.io/dashboard?id=Haproxy.AgentCheck)
 [![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=Haproxy.AgentCheck&metric=sqale_index)](https://sonarcloud.io/dashboard?id=Haproxy.AgentCheck)
 
-This application is a lightweight external agent installed on servers / VM / pods, exposing TCP & HTTP endpoints to report the server’s state to Haproxy LB. It's based on Kestrel / .NET Core 3.1, so it's very light.
+This application is a lightweight external agent installed on servers / VM / pods, exposing TCP & HTTP endpoints to report the server's state to Haproxy LB. It's based on Kestrel / .NET 10, so it's very light.
 
 With the reported health metric, Haproxy can dynamically adjust backend weight, and evenly load balance traffic between hosts. When a host metric spikes (ex a CPU going to 100% because of a VM on a failing host, or an infinite loop made by a tired developer), the reported weight to Haproxy is minimum, telling Haproxy to schedule the minimum traffic to this host.
 
