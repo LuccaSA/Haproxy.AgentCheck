@@ -17,10 +17,10 @@ jobs:
     - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6
     - run: git fetch --prune --unshallow
 
-    - name: Setup .NET Core 8
+    - name: Setup .NET 10
       uses: actions/setup-dotnet@2016bd2012dba4e32de620c46fe006a3ac9f0602 # v5
       with:
-        dotnet-version: '8.0.x'
+        dotnet-version: '10.0.x'
 
     - name: Install dependencies
       run: dotnet restore
@@ -34,19 +34,8 @@ jobs:
       id: gitversion # step id used as reference for output values
       uses: gittools/actions/gitversion/execute@51d325634925d7d9ce0a7efc2c586c0bc2b9eee6 # v3.2.1
 
-#    - name: Setup SonarScanner
-#      run: dotnet tool install --tool-path artifacts dotnet-sonarscanner
-
-#    - name: SonarScanner begin
-#      run: artifacts/dotnet-sonarscanner begin /k:"Haproxy.AgentCheck" /o:"lucca" /d:sonar.login=${{ secrets.SONAR_TOKEN }} /d:sonar.host.url="https://sonarcloud.io/" /d:sonar.cs.opencover.reportsPaths="./coverage.opencover.xml"
-
     - name: Test
-      run: dotnet test --no-restore --verbosity minimal /p:CollectCoverage=true /p:CoverletOutput=../ /p:CoverletOutputFormat=opencover --logger:"console;verbosity=detailed"
-
-#    - name: SonarScanner end
-#      run: artifacts/dotnet-sonarscanner end /d:sonar.login=${{ secrets.SONAR_TOKEN }}
-#      env:
-#        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: dotnet test --solution Haproxy.AgentCheck.sln --coverage --report-github
 
     - name: Publish win-x64
       run: |
