@@ -47,10 +47,10 @@ public class IntegrationTests(ITestOutputHelper outputHelper)
         // request
         await stream.WriteAsync(Encoding.ASCII.GetBytes(""));
         // response
-        var buffer = new byte[8].AsMemory();
-        await stream.ReadAsync(buffer);
+        var buffer = new byte[8];
+        var bytesRead = await stream.ReadAsync(buffer.AsMemory());
 
-        var response = Encoding.ASCII.GetString(buffer.Span);
+        var response = Encoding.ASCII.GetString(buffer, 0, bytesRead);
         Assert.StartsWith("up", response);
     }
 }
