@@ -17,10 +17,7 @@ internal static class HostBuilderExtensions
         {
             hostBuilder.UseSystemd();
         }
-        else
-        {
-            throw new NotSupportedException("Unsupported platform");
-        }
+        // On other platforms (macOS), run as a console application
     }
 
     public static void UseKestrelOnPorts(this IWebHostBuilder webHostBuilder, int http, int tcp)
@@ -48,7 +45,13 @@ internal static class HostBuilderExtensions
         }
         else
         {
-            throw new PlatformNotSupportedException("Only windows and linux platforms are supported");
+            // On other platforms (macOS), use a no-op collector for development/testing
+            services.AddSingleton<IStateCollector, NullStateCollector>();
         }
     }
+}
+
+internal sealed class NullStateCollector : IStateCollector
+{
+    public void Collect() { }
 }
