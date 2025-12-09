@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Logging;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace Lucca.Infra.Haproxy.AgentCheck.Tests;
 #pragma warning disable S1144
@@ -24,7 +23,7 @@ public class IntegrationTests(ITestOutputHelper outputHelper)
             });
         });
         var client = f.CreateClient();
-        var s = await client.GetStringAsync("");
+        var s = await client.GetStringAsync("", TestContext.Current.CancellationToken);
         Assert.Equal("CPU : 0%\nIIS Requests : 0", s);
         Assert.True(true);
     }
@@ -47,10 +46,10 @@ public class IntegrationTests(ITestOutputHelper outputHelper)
         // request
         await stream.WriteAsync(Encoding.ASCII.GetBytes(""));
         // response
-        var buffer = new byte[8].AsMemory();
-        await stream.ReadAsync(buffer);
+        var buffer = new byte[8];
+        var bytesRead = await stream.ReadAsync(buffer.AsMemory());
 
-        var response = Encoding.ASCII.GetString(buffer.Span);
+        var response = Encoding.ASCII.GetString(buffer, 0, bytesRead);
         Assert.StartsWith("up", response);
     }
 }
