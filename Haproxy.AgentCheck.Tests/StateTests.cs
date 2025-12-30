@@ -1,8 +1,7 @@
-﻿using Lucca.Infra.Haproxy.AgentCheck.Config;
+using Lucca.Infra.Haproxy.AgentCheck.Config;
 using Lucca.Infra.Haproxy.AgentCheck.Metrics;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace Lucca.Infra.Haproxy.AgentCheck.Tests;
 
@@ -25,7 +24,7 @@ public class StateTests(ITestOutputHelper testOutputHelper)
             {
                 Name = "CPU",
                 Source = RuleSource.System,
-                Weight = new()
+                Weight = new WeightRule
                 {
                     SystemResponse = SystemResponse.Linear,
                     MinValue = data.MinValue,
@@ -49,7 +48,7 @@ public class StateTests(ITestOutputHelper testOutputHelper)
             {
                 Name = "CPU",
                 Source = RuleSource.System,
-                Weight = new()
+                Weight = new WeightRule
                 {
                     SystemResponse = SystemResponse.FirstOrder,
                     MinValue = data.MinValue,
@@ -68,20 +67,20 @@ public class StateTests(ITestOutputHelper testOutputHelper)
     public void Check_that_the_lowest_weight_is_used()
     {
         var serviceProvider = CreateServiceProvider(
-            new()
+            new RuleConfig
             {
                 Name = "CPU",
                 Source = RuleSource.System,
-                Weight = new()
+                Weight = new WeightRule
                 {
                     SystemResponse = SystemResponse.Linear
                 }
             },
-            new()
+            new RuleConfig
             {
                 Name = "IisRequests",
                 Source = RuleSource.System,
-                Weight = new()
+                Weight = new WeightRule
                 {
                     SystemResponse = SystemResponse.Linear
                 }
@@ -100,7 +99,7 @@ public class StateTests(ITestOutputHelper testOutputHelper)
             {
                 Name = "CPU",
                 Source = RuleSource.System,
-                Failure = new()
+                Failure = new FailureRule
                 {
                     EnterThreshold = 60,
                     LeaveThreshold = 40
@@ -120,7 +119,7 @@ public class StateTests(ITestOutputHelper testOutputHelper)
             {
                 Name = "CPU",
                 Source = RuleSource.System,
-                Failure = new()
+                Failure = new FailureRule
                 {
                     EnterThreshold = 60,
                     LeaveThreshold = 40
@@ -136,21 +135,21 @@ public class StateTests(ITestOutputHelper testOutputHelper)
     public void Check_that_given_one_metric_above_threshold_state_is_down()
     {
         var serviceProvider = CreateServiceProvider(
-            new()
+            new RuleConfig
             {
                 Name = "CPU",
                 Source = RuleSource.System,
-                Failure = new()
+                Failure = new FailureRule
                 {
                     EnterThreshold = 60,
                     LeaveThreshold = 40
                 }
             },
-            new()
+            new RuleConfig
             {
                 Name = "IisRequests",
                 Source = RuleSource.System,
-                Failure = new()
+                Failure = new FailureRule
                 {
                     EnterThreshold = 10,
                     LeaveThreshold = 10
@@ -171,7 +170,7 @@ public class StateTests(ITestOutputHelper testOutputHelper)
             {
                 Name = "CPU",
                 Source = RuleSource.System,
-                Failure = new()
+                Failure = new FailureRule
                 {
                     EnterThreshold = 60,
                     LeaveThreshold = 40
@@ -192,7 +191,7 @@ public class StateTests(ITestOutputHelper testOutputHelper)
             {
                 Name = "CPU",
                 Source = RuleSource.System,
-                Failure = new()
+                Failure = new FailureRule
                 {
                     EnterThreshold = 60,
                     LeaveThreshold = 40
@@ -213,7 +212,7 @@ public class StateTests(ITestOutputHelper testOutputHelper)
             {
                 Name = "CPU",
                 Source = RuleSource.System,
-                Failure = new()
+                Failure = new FailureRule
                 {
                     EnterThreshold = 60,
                     LeaveThreshold = 40,
@@ -235,7 +234,7 @@ public class StateTests(ITestOutputHelper testOutputHelper)
             {
                 Name = "CPU",
                 Source = RuleSource.System,
-                Failure = new()
+                Failure = new FailureRule
                 {
                     EnterThreshold = 60,
                     LeaveThreshold = 40,
@@ -259,7 +258,7 @@ public class StateTests(ITestOutputHelper testOutputHelper)
             {
                 Name = "CPU",
                 Source = RuleSource.System,
-                Failure = new()
+                Failure = new FailureRule
                 {
                     EnterThreshold = 60,
                     LeaveThreshold = 40,
@@ -277,42 +276,41 @@ public class StateTests(ITestOutputHelper testOutputHelper)
 
     public static TheoryData<WeightRuleData> GetLinearResponseTestData()
     {
-        return new TheoryData<WeightRuleData>
-        {
-            new(0, 100, 0, 100, 0, 100),
-            new(50, 50, 0, 100, 0, 100),
-            new(100, 0, 0, 100, 0, 100),
+        return new TheoryData<WeightRuleData>(
+            new WeightRuleData(0, 100, 0, 100, 0, 100),
+            new WeightRuleData(50, 50, 0, 100, 0, 100),
+            new WeightRuleData(100, 0, 0, 100, 0, 100),
 
-            new(0, 80, 0, 100, 10, 80),
-            new(50, 45, 0, 100, 10, 80),
-            new(100, 10, 0, 100, 10, 80),
+            new WeightRuleData(0, 80, 0, 100, 10, 80),
+            new WeightRuleData(50, 45, 0, 100, 10, 80),
+            new WeightRuleData(100, 10, 0, 100, 10, 80),
 
-            new(0, 100, 10, 80, 0, 100),
-            new(10, 100, 10, 80, 0, 100),
-            new(50, 42.85, 10, 80, 0, 100),
-            new(80, 0, 10, 80, 0, 100),
-            new(100, 0, 10, 80, 0, 100)
-        };
+            new WeightRuleData(0, 100, 10, 80, 0, 100),
+            new WeightRuleData(10, 100, 10, 80, 0, 100),
+            new WeightRuleData(50, 42.85, 10, 80, 0, 100),
+            new WeightRuleData(80, 0, 10, 80, 0, 100),
+            new WeightRuleData(100, 0, 10, 80, 0, 100)
+        );
     }
 
     public static TheoryData<WeightRuleData> GetFirstOrderResponseTestData()
     {
-        return new TheoryData<WeightRuleData>
-        {
-            new(0, 100, 0, 100, 0, 100),
-            new(50, 9.05, 0, 100, 0, 100),
-            new(100, 0, 0, 100, 0, 100),
+        return new TheoryData<WeightRuleData>(
+        
+            new WeightRuleData(0, 100, 0, 100, 0, 100),
+            new WeightRuleData(50, 9.05, 0, 100, 0, 100),
+            new WeightRuleData(100, 0, 0, 100, 0, 100),
 
-            new(0, 80, 0, 100, 10, 80),
-            new(50, 17.42, 0, 100, 10, 80),
-            new(100, 10, 0, 100, 10, 80),
+            new WeightRuleData(    0, 80, 0, 100, 10, 80),
+            new WeightRuleData(50, 17.42, 0, 100, 10, 80),
+            new WeightRuleData(100, 10, 0, 100, 10, 80),
 
-            new(0, 100, 10, 80, 0, 100),
-            new(10, 100, 10, 80, 0, 100),
-            new(45, 9.05, 10, 80, 0, 100),
-            new(80, 0, 10, 80, 0, 100),
-            new(100, 0, 10, 80, 0, 100)
-        };
+            new WeightRuleData(0, 100, 10, 80, 0, 100),
+            new WeightRuleData(10, 100, 10, 80, 0, 100),
+            new WeightRuleData(45, 9.05, 10, 80, 0, 100),
+            new WeightRuleData(80, 0, 10, 80, 0, 100),
+            new WeightRuleData(100, 0, 10, 80, 0, 100)
+        );
     }
 
     private IServiceProvider CreateServiceProvider(params RuleConfig[] rules)
