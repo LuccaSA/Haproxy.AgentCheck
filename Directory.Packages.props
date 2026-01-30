@@ -6,7 +6,7 @@
   <ItemGroup>
     <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.0.23" />
     <PackageVersion Include="Microsoft.Diagnostics.NETCore.Client" Version="0.2.661903" />
-    <PackageVersion Include="Microsoft.Diagnostics.Tracing.TraceEvent" Version="3.1.28" />
+    <PackageVersion Include="Microsoft.Diagnostics.Tracing.TraceEvent" Version="3.1.29" />
     <PackageVersion Include="Microsoft.Extensions.Diagnostics.Testing" Version="9.10.0" />
     <PackageVersion Include="Microsoft.Extensions.Hosting.Systemd" Version="9.0.12" />
     <PackageVersion Include="Microsoft.Extensions.Hosting.WindowsServices" Version="9.0.12" />
