@@ -17,7 +17,7 @@
     <PackageVersion Include="System.Diagnostics.PerformanceCounter" Version="9.0.13" />
     <PackageVersion Include="System.IO.Pipelines" Version="9.0.13" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
-    <PackageVersion Include="coverlet.msbuild" Version="6.0.4">
+    <PackageVersion Include="coverlet.msbuild" Version="8.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageVersion>
